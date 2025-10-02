@@ -240,24 +240,24 @@ window.FarmGod.Translation = (function () {
   const msg = {
     de_DE: {
       missingFeatures:
-        'Das Script benötigt einen Premium-Account und den Beuteassistenten!',
+        'Das Script benÃ¶tigt einen Premium-Account und den Beuteassistenten!',
       options: {
         title: 'FarmGod Optionen',
         warning:
-          '<b>Hinweis:</b><br>- Stelle sicher, dass A deine Standard-Mikrofarm ist und B eine größere Mikrofarm<br>- Prüfe die Farm-Filter, bevor du das Script nutzt',
+          '<b>Hinweis:</b><br>- Stelle sicher, dass A deine Standard-Mikrofarm ist und B eine grÃ¶ÃŸere Mikrofarm<br>- PrÃ¼fe die Farm-Filter, bevor du das Script nutzt',
         filterImage:
           'https://higamy.github.io/TW/Scripts/Assets/farmGodFilters.png',
         group: 'Farms aus Gruppe senden:',
-        distance: 'Maximale Felder-Distanz für Farms:',
+        distance: 'Maximale Felder-Distanz fÃ¼r Farms:',
         time: 'Abstand zwischen Angriffen (in Minuten):',
         losses: 'Auch bei teilweisen Verlusten farmen:',
         maxloot: 'B-Vorlage senden, wenn letzte Beute voll war:',
-        newbarbs: 'Neue Barbarendörfer zum Farmen hinzufügen:',
+        newbarbs: 'Neue BarbarendÃ¶rfer zum Farmen hinzufÃ¼gen:',
         button: 'Farms planen',
       },
       table: {
         noFarmsPlanned:
-          'Mit den gewählten Einstellungen können keine Farms gesendet werden.',
+          'Mit den gewÃ¤hlten Einstellungen kÃ¶nnen keine Farms gesendet werden.',
         origin: 'Herkunft',
         target: 'Ziel',
         fields: 'Felder',
@@ -267,7 +267,7 @@ window.FarmGod.Translation = (function () {
       messages: {
         villageChanged: 'Dorf erfolgreich gewechselt!',
         villageError:
-          'Alle Farms für das aktuelle Dorf wurden bereits gesendet!',
+          'Alle Farms fÃ¼r das aktuelle Dorf wurden bereits gesendet!',
         sendError: 'Fehler: Farm nicht gesendet!',
       },
     },
@@ -306,36 +306,36 @@ window.FarmGod.Translation = (function () {
     },
     hu_HU: {
       missingFeatures:
-        'A scriptnek szüksége van Prémium fiókra és Farmkezelőre!',
+        'A scriptnek szÃ¼ksÃ©ge van PrÃ©mium fiÃ³kra Ã©s FarmkezelÅ‘re!',
       options: {
-        title: 'FarmGod opciók',
+        title: 'FarmGod opciÃ³k',
         warning:
-          '<b>Figyelem:</b><br>- Bizonyosodj meg róla, hogy az "A" sablon az alapértelmezett és a "B" egy nagyobb mikró-farm<br>- Bizonyosodj meg róla, hogy a farm-filterek megfelelően vannak beállítva',
+          '<b>Figyelem:</b><br>- Bizonyosodj meg rÃ³la, hogy az "A" sablon az alapÃ©rtelmezett Ã©s a "B" egy nagyobb mikrÃ³-farm<br>- Bizonyosodj meg rÃ³la, hogy a farm-filterek megfelelÅ‘en vannak beÃ¡llÃ­tva',
         filterImage:
           'https://higamy.github.io/TW/Scripts/Assets/farmGodFilters_HU.png',
-        group: 'Ebből a csoportból küldje:',
-        distance: 'Maximális mező távolság:',
-        time: 'Időköz támadások között (perc):',
+        group: 'EbbÅ‘l a csoportbÃ³l kÃ¼ldje:',
+        distance: 'MaximÃ¡lis mezÅ‘ tÃ¡volsÃ¡g:',
+        time: 'IdÅ‘kÃ¶z tÃ¡madÃ¡sok kÃ¶zÃ¶tt (perc):',
         losses:
-          'Küldjön támadást részleges veszteségnél is:',
+          'KÃ¼ldjÃ¶n tÃ¡madÃ¡st rÃ©szleges vesztesÃ©gnÃ©l is:',
         maxloot:
-          '„B” sablont küldjön, ha az előző rablás tele volt:',
-        newbarbs: 'Új barbár faluk hozzáadása:',
-        button: 'Farm megtervezése',
+          'â€žBâ€ sablont kÃ¼ldjÃ¶n, ha az elÅ‘zÅ‘ rablÃ¡s tele volt:',
+        newbarbs: 'Ãšj barbÃ¡r faluk hozzÃ¡adÃ¡sa:',
+        button: 'Farm megtervezÃ©se',
       },
       table: {
         noFarmsPlanned:
-          'A beállításokkal nem küldhető új támadás.',
+          'A beÃ¡llÃ­tÃ¡sokkal nem kÃ¼ldhetÅ‘ Ãºj tÃ¡madÃ¡s.',
         origin: 'Eredet',
-        target: 'Célpont',
-        fields: 'Távolság',
+        target: 'CÃ©lpont',
+        fields: 'TÃ¡volsÃ¡g',
         farm: 'Farm',
-        goTo: 'Ugrás',
+        goTo: 'UgrÃ¡s',
       },
       messages: {
-        villageChanged: 'Falu sikeresen megváltoztatva!',
-        villageError: 'Minden farm kiment a jelenlegi faluból!',
-        sendError: 'Hiba: Farm nem volt elküldve!',
+        villageChanged: 'Falu sikeresen megvÃ¡ltoztatva!',
+        villageError: 'Minden farm kiment a jelenlegi falubÃ³l!',
+        sendError: 'Hiba: Farm nem volt elkÃ¼ldve!',
       },
     },
     int: {
@@ -374,7 +374,7 @@ window.FarmGod.Translation = (function () {
   };
 
   const get = function () {
-    // Nutze de_DE, wenn verfügbar; sonst Fallback auf int
+    // Nutze de_DE, wenn verfÃ¼gbar; sonst Fallback auf int
     let locale = (typeof game_data !== 'undefined' && game_data.locale) || 'int';
     if (!msg.hasOwnProperty(locale) && /^de/.test(locale)) locale = 'de_DE';
     let lang = msg.hasOwnProperty(locale) ? locale : 'int';
@@ -420,7 +420,7 @@ window.FarmGod.Main = (function (Library, Translation) {
     const $start = $('#FarmGodStartBtn');
     if (!$start.length) return;
     if (autoTimer) {
-      $start.text('Läuft…').prop('disabled', true);
+      $start.text('LÃ¤uftâ€¦').prop('disabled', true);
     } else {
       $start.text('Start').prop('disabled', false);
     }
@@ -763,39 +763,39 @@ window.FarmGod.Main = (function (Library, Translation) {
         .map((key) => ({ coord: key, dis: lib.getDistance(prop, key) }))
         .sort((a, b) => (a.dis > b.dis ? 1 : -1));
 
-      orderedFarms.forEach((el) => {
-        let farmIndex = data.farms.farms[el.coord];
-        let template_name = (optionMaxloot && farmIndex.hasOwnProperty('max_loot') && farmIndex.max_loot) ? 'b' : 'a';
-        let template = data.farms.templates[template_name];
-        let unitsLeft = lib.subtractArrays(data.villages[prop].units, template.units);
+    orderedFarms.forEach((el) => {
+      let farmIndex = data.farms.farms[el.coord];
+      let template_name = (optionMaxloot && farmIndex.hasOwnProperty('max_loot') && farmIndex.max_loot) ? 'b' : 'a';
+      let template = data.farms.templates[template_name];
+      let unitsLeft = lib.subtractArrays(data.villages[prop].units, template.units);
 
-        let distance = lib.getDistance(prop, el.coord);
-        let arrival = Math.round(serverTime + distance * template.speed * 60 + Math.round(plan.counter / 5));
-        let maxTimeDiff = Math.round(optionTime * 60);
-        let timeDiff = true;
+      let distance = lib.getDistance(prop, el.coord);
+      let arrival = Math.round(serverTime + distance * template.speed * 60 + Math.round(plan.counter / 5));
+      let maxTimeDiff = Math.round(optionTime * 60);
+      let timeDiff = true;
 
-        if (data.commands.hasOwnProperty(el.coord)) {
-          if (!farmIndex.hasOwnProperty('color') && data.commands[el.coord].length > 0) timeDiff = false;
-          data.commands[el.coord].forEach((timestamp) => {
-            if (Math.abs(timestamp - arrival) < maxTimeDiff) timeDiff = false;
-          });
-        } else {
-          data.commands[el.coord] = [];
-        }
+      if (data.commands.hasOwnProperty(el.coord)) {
+        if (!farmIndex.hasOwnProperty('color') && data.commands[el.coord].length > 0) timeDiff = false;
+        data.commands[el.coord].forEach((timestamp) => {
+          if (Math.abs(timestamp - arrival) < maxTimeDiff) timeDiff = false;
+        });
+      } else {
+        data.commands[el.coord] = [];
+      }
 
-        if (unitsLeft && timeDiff && distance < optionDistance) {
-          plan.counter++;
-          if (!plan.farms.hasOwnProperty(prop)) plan.farms[prop] = [];
-          plan.farms[prop].push({
-            origin: { coord: prop, name: data.villages[prop].name, id: data.villages[prop].id },
-            target: { coord: el.coord, id: farmIndex.id },
-            fields: distance,
-            template: { name: template_name, id: template.id },
-          });
-          data.villages[prop].units = unitsLeft;
-          data.commands[el.coord].push(arrival);
-        }
-      });
+      if (unitsLeft && timeDiff && distance < optionDistance) {
+        plan.counter++;
+        if (!plan.farms.hasOwnProperty(prop)) plan.farms[prop] = [];
+        plan.farms[prop].push({
+          origin: { coord: prop, name: data.villages[prop].name, id: data.villages[prop].id },
+          target: { coord: el.coord, id: farmIndex.id },
+          fields: distance,
+          template: { name: template_name, id: template.id },
+        });
+        data.villages[prop].units = unitsLeft;
+        data.commands[el.coord].push(arrival);
+      }
+    });
     }
     return plan;
   };
@@ -810,7 +810,7 @@ window.FarmGod.Main = (function (Library, Translation) {
       TribalWars.post(
         Accountmanager.send_units_link.replace(/village=(\d+)/, 'village=' + $this.data('origin')),
         null,
-        { target: $this.data('target'), template_id: $this.data['template'], source: $this.data('origin') },
+        { target: $this.data('target'), template_id: $this.data('template'), source: $this.data('origin') },
         function (r) {
           UI.SuccessMessage(r.success);
           $pb.data('current', $pb.data('current') + 1);
