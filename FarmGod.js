@@ -240,24 +240,24 @@ window.FarmGod.Translation = (function () {
   const msg = {
     de_DE: {
       missingFeatures:
-        'Das Script benÃ¶tigt einen Premium-Account und den Beuteassistenten!',
+        'Das Script benötigt einen Premium-Account und den Beuteassistenten!',
       options: {
         title: 'FarmGod Optionen',
         warning:
-          '<b>Hinweis:</b><br>- Stelle sicher, dass A deine Standard-Mikrofarm ist und B eine grÃ¶ÃŸere Mikrofarm<br>- PrÃ¼fe die Farm-Filter, bevor du das Script nutzt',
+          '<b>Hinweis:</b><br>- Stelle sicher, dass A deine Standard-Mikrofarm ist und B eine größere Mikrofarm<br>- Prüfe die Farm-Filter, bevor du das Script nutzt',
         filterImage:
           'https://higamy.github.io/TW/Scripts/Assets/farmGodFilters.png',
         group: 'Farms aus Gruppe senden:',
-        distance: 'Maximale Felder-Distanz fÃ¼r Farms:',
+        distance: 'Maximale Felder-Distanz für Farms:',
         time: 'Abstand zwischen Angriffen (in Minuten):',
         losses: 'Auch bei teilweisen Verlusten farmen:',
         maxloot: 'B-Vorlage senden, wenn letzte Beute voll war:',
-        newbarbs: 'Neue BarbarendÃ¶rfer zum Farmen hinzufÃ¼gen:',
+        newbarbs: 'Neue Barbarendörfer zum Farmen hinzufügen:',
         button: 'Farms planen',
       },
       table: {
         noFarmsPlanned:
-          'Mit den gewÃ¤hlten Einstellungen kÃ¶nnen keine Farms gesendet werden.',
+          'Mit den gewählten Einstellungen können keine Farms gesendet werden.',
         origin: 'Herkunft',
         target: 'Ziel',
         fields: 'Felder',
@@ -267,7 +267,7 @@ window.FarmGod.Translation = (function () {
       messages: {
         villageChanged: 'Dorf erfolgreich gewechselt!',
         villageError:
-          'Alle Farms fÃ¼r das aktuelle Dorf wurden bereits gesendet!',
+          'Alle Farms für das aktuelle Dorf wurden bereits gesendet!',
         sendError: 'Fehler: Farm nicht gesendet!',
       },
     },
