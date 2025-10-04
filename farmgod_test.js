@@ -548,7 +548,6 @@ window.FarmGod.Main = (function (Library, Translation) {
                   <tr><td>${t.options.losses}</td><td><input type="checkbox" class="optionLosses" ${options.optionLosses ? 'checked' : ''}></td></tr>
                   <tr><td>${t.options.maxloot}</td><td><input type="checkbox" class="optionMaxloot" ${options.optionMaxloot ? 'checked' : ''}></td></tr>
                   <tr><td>${t.options.newbarbs}</td><td><input type="checkbox" class="optionNewbarbs" ${options.optionNewbarbs ? 'checked' : ''}></td></tr>
-                    : ''}
                   <tr><td>Nach dem Planen automatisch senden:</td>
                       <td><input type="checkbox" class="optionAutoRun" ${options.autoRun ? 'checked' : ''}></td></tr>
                 </table>
