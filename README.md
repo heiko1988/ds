@@ -14,9 +14,10 @@ Dieses Repository enthält zwei leistungsstarke Farming-Tools für **Die Stämme
 - **`FarmGod`** – Der **klassische, zuverlässige Farming-Bot**  
 - **`FarmGod Test`** – Die **erweiterte Version mit automatischer Barbarendorf-Suche**
 
-Beide Tools helfen dir, inaktive Dörfer effizient zu farmen, Ressourcen zu maximieren und deine Truppen intelligent einzusetzen – **ohne gegen die Spielregeln zu verstoßen**.
+Beide Tools helfen dir, inaktive Dörfer effizient zu farmen, Ressourcen zu maximieren und deine Truppen intelligent einzusetzen.
 
-> **Wichtig**: Nutzung auf eigene Verantwortung. Die Skripte sind für **Bildungszwecke** gedacht. Respektiere die [Nutzungsbedingungen von Die Stämme](https://www.die-staemme.de/terms).
+> **Wichtig**: Nutzung auf eigene Verantwortung. Die Skripte sind für **Bildungszwecke** gedacht.
+> Respektiere die [Nutzungsbedingungen von Die Stämme](https://www.die-staemme.de/page/rules).
 
 ---
 
