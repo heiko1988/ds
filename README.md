@@ -1,7 +1,7 @@
 # Die Stämme – FarmGod & FarmGod Test  
 **Automatisiertes Farming für [Die Stämme](https://www.die-staemme.de)**  
 
-![Die Stämme](https://www.die-staemme.de/images/game/bg.jpg)  
+![Die Stämme](https://upload.wikimedia.org/wikipedia/de/b/ba/Die_St%C3%A4mme_Logo.png)
 *Effizientes, regelkonformes Farming – mit smarter Zielsuche und Truppenoptimierung.*
 
 ---
