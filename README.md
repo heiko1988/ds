@@ -56,19 +56,21 @@ Beide Tools helfen dir, inaktive Dörfer effizient zu farmen, Ressourcen zu maxi
 
 ## 🛠️ Installation & Nutzung
 
-###Farmgod: 
-Einstellungen / Schnellleiste / Neuer Eintrag 
-Name des Eintrags:	Frei Wählbar
-Hovertext:	Frei Wählbar
-Bild-URL:	Frei Wählbar
-Ziel-URL: javascript: $.getScript('https://heiko1988.github.io/ds/FarmGod.js?v='+(Date.now()));
+ ##**`Farmgod:`**
+ Name | Eingabe |
+|-------|---------|
+| **Name des Eintrags:** | Frei Wählbar |
+| **Hovertext** | Frei Wählbar |
+| **Bild-URL** | Frei Wählbar |
+| **Ziel-URL** | javascript: $.getScript('https://heiko1988.github.io/ds/FarmGod.js?v='+(Date.now()));
 
 Oder
 
-###Farmgod Test: 
-Einstellungen / Schnellleiste / Neuer Eintrag 
-Name des Eintrags:	Frei Wählbar
-Hovertext:	Frei Wählbar
-Bild-URL:	Frei Wählbar
-Ziel-URL: javascript: $.getScript('https://heiko1988.github.io/ds/farmgod_test.js?v='+(Date.now()));
+##**`Farmgod Test: `**
+ Name | Eingabe |
+|-------|---------|
+| **Name des Eintrags:** | Frei Wählbar |
+| **Hovertext** | Frei Wählbar |
+| **Bild-URL** | Frei Wählbar |
+| **Ziel-URL** | javascript: $.getScript('https://heiko1988.github.io/ds/farmgod_test.js?v='+(Date.now()));
 
