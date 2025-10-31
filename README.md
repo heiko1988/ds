@@ -56,7 +56,7 @@ Beide Tools helfen dir, inaktive Dörfer effizient zu farmen, Ressourcen zu maxi
 
 ## 🛠️ Installation & Nutzung
 
- ##**`Farmgod:`**
+ ## **`Farmgod:`**
  Name | Eingabe |
 |-------|---------|
 | **Name des Eintrags:** | Frei Wählbar |
@@ -64,9 +64,8 @@ Beide Tools helfen dir, inaktive Dörfer effizient zu farmen, Ressourcen zu maxi
 | **Bild-URL** | Frei Wählbar |
 | **Ziel-URL** | javascript: $.getScript('https://heiko1988.github.io/ds/FarmGod.js?v='+(Date.now()));
 
-Oder
 
-##**`Farmgod Test: `**
+## **`Farmgod Test: `**
  Name | Eingabe |
 |-------|---------|
 | **Name des Eintrags:** | Frei Wählbar |
