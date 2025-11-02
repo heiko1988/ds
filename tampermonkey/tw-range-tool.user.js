@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         TW Range Tool + Debugmode
 // @namespace    http://tampermonkey.net/
-// @version      3.6
+// @version      4.0
 // @description  Zeigt an, ob du in der Punkterange eines Spielers bist (+/-) und wie viele Punkte Unterschied bestehen. Mit Debug-Modus und Cache. AUTO Range + nächste Änderung! (Map-Hover für Dörfer! FIXED: + in Namen + mehr Infos)
 // @author       Heiko & GPT
 // @match        https://*/game.php*
