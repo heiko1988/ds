@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         TW Range Tool + Debugmode
 // @namespace    http://tampermonkey.net/
-// @version      4.1
-// @description  Zeigt an, ob du in der Punkterange eines Spielers bist (+/-) und wie viele Punkte Unterschied bestehen. Mit Debug-Modus und Cache. AUTO Range + nächste Änderung! (Map-Hover für Dörfer! FIXED: + in Namen + mehr Infos)
+// @version      4.2
+// @description  Zeigt an, ob du in der Punkterange eines Spielers bist (+/-) und wie viele Punkte Unterschied bestehen. Mit Debug-Modus und Cache. AUTO Range + nächste Änderung! (Map-Hover für Dörfer! FIXED: + in Namen + mehr Infos + Map-Kontextmenü)
 // @author       Heiko & GPT
 // @match        https://*/game.php*
 // @grant        GM_setValue
@@ -59,7 +59,7 @@
         document.body.appendChild(btn);
     }
 
-    // === MAP-MOVER INTEGRATION ===
+    // === MAP-MOVER INTEGRATION (FIXED: Kontextmenü für linke Klicks) ===
     function integrateMapMover() {
         const waitForMapMover = setInterval(() => {
             const mapMover = document.getElementById('map_mover');
@@ -67,12 +67,24 @@
                 clearInterval(waitForMapMover);
                 debugLog('Map-Mover gefunden und integriert.');
 
+                // Nur für Rechtsklick (Kontextmenü): Browser-Menü blocken, aber TW-Menü durchlassen
+                mapMover.addEventListener('contextmenu', (e) => {
+                    if (e.button === 2) { // Rechtsklick
+                        e.preventDefault(); // Browser-Menü blocken
+                        debugLog('Rechtsklick auf Map-Mover geblockt.');
+                    }
+                }, true);
+
+                // Linker Klick: Voll durchlassen (für TW-Kontextmenü)
                 mapMover.addEventListener('click', (e) => {
-                    e.stopPropagation();
+                    if (e.button === 0) { // Linker Klick
+                        e.stopPropagation(); // Nur Propagation für Links unter Overlay
+                        debugLog('Linker Klick auf Map-Mover durchgelassen.');
+                    }
                 }, true);
 
                 if (SETTINGS.debugMode) {
-                    mapMover.title = 'Range Tool: Map-Mover integriert – Links unten funktionieren!';
+                    mapMover.title = 'Range Tool: Map-Mover integriert – Kontextmenü aktiv!';
                 }
             }
         }, 500);
@@ -130,7 +142,7 @@
             const res = await fetch(url);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const text = await res.text();
-
+            
             const match = text.match(/Casual-Angriffsblock.*?(\d+)%/i);
             let blockPercent = 20;
             if (match) {
@@ -165,7 +177,7 @@
             const res = await fetch(url);
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
             const text = await res.text();
-
+            
             const now = new Date();
             let nextChange = null;
             const dateRegex = /<td[^>]*>(\d{2}\.\d{2}\.\d{4} um \d{2}:\d{2}:\d{2})<\/td>/g;
@@ -173,31 +185,31 @@
             while ((dateMatch = dateRegex.exec(text)) !== null) {
                 const dateStr = dateMatch[1];
                 const startAfterDate = dateMatch.index + dateMatch[0].length;
-
+                
                 const tdStartRegex = /<td[^>]*>/;
                 const tdStartMatch = tdStartRegex.exec(text.slice(startAfterDate));
                 if (!tdStartMatch) continue;
                 const blockStart = startAfterDate + tdStartMatch.index;
-
+                
                 const tdEndRegex = /<\/td>/;
                 const tdEndMatch = tdEndRegex.exec(text.slice(blockStart));
                 if (!tdEndMatch) continue;
                 const blockEnd = blockStart + tdEndMatch.index;
-
+                
                 const blockContent = text.slice(blockStart, blockEnd).trim();
-
+                
                 const percentMatch = /(\d+)%/.exec(blockContent);
                 if (!percentMatch) {
                     debugLog(`Kein % im Block für ${dateStr}: "${blockContent.substring(0, 50)}..."`);
                     continue;
                 }
                 const blockPercent = parseInt(percentMatch[1], 10);
-
+                
                 const dateParts = dateStr.replace(' um ', ' ').split(' ');
                 const [day, month, year] = dateParts[0].split('.').map(Number);
                 const [h, m, s] = dateParts[1].split(':').map(Number);
                 const changeDate = new Date(year, month - 1, day, h, m, s);
-
+                
                 if (changeDate > now && (!nextChange || changeDate < nextChange.date)) {
                     nextChange = {
                         date: changeDate,
@@ -424,16 +436,16 @@
 
             const rangeText = `${Math.round(minRange*100)}-${Math.round(maxRange*100)}%`;
             const tooltipText = `Punkte: ${otherPoints} (${diff}) | Range: ${rangeText} | Status: ${status} | Next: ${nextInfo}`;
-
+            
             link.style.position = 'relative';
             link.title = tooltipText;
-
+            
             if (SETTINGS.debugMode) {
                 const info = document.createElement('span');
                 let bgColor = '#ff6961';
                 if (status === 'innerhalb') bgColor = '#00ff7f';
                 else if (status === 'zu niedrig') bgColor = '#4a90e2';
-
+                
                 info.innerHTML = ` <span style="background: ${bgColor}; color: black; padding: 1px 3px; border-radius: 2px; font-weight: bold; font-size: 10px;">${diffPercentText}</span>`;
                 link.appendChild(info);
             }
