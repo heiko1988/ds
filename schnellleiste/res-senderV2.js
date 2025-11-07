@@ -1,5 +1,3 @@
-Passt mit angaben von holt, lehm und eisen und % im lager lassen klappt auch standart ist auf münzen, speichert aber eigene angaben an resourscen in der session und eigene dörfer anzeigen
-
 javascript:
 var warehouseCapacity = [];
 var allWoodTotals = [];
