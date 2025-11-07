@@ -1,3 +1,5 @@
+Passt mit angaben von holt, lehm und eisen und % im lager lassen klappt auch standart ist auf münzen, speichert aber eigene angaben an resourscen in der session und eigene dörfer anzeigen
+
 javascript:
 var warehouseCapacity = [];
 var allWoodTotals = [];
@@ -13,10 +15,12 @@ var totalsAndAverages = "";
 var data, totalWood = 0, totalStone = 0, totalIron = 0, resLimit = 0;
 var sendBack;
 var totalWoodSent = 0; totalStoneSent = 0; totalIronSent = 0;
+
 // Standardwerte für Münzen
 var defaultWood = 28000;
 var defaultStone = 30000;
 var defaultIron = 25000;
+
 // Benutzerwerte laden
 var targetWood = parseInt(sessionStorage.getItem("targetWood")) || defaultWood;
 var targetStone = parseInt(sessionStorage.getItem("targetStone")) || defaultStone;
@@ -25,11 +29,13 @@ var totalTarget = targetWood + targetStone + targetIron;
 var woodPercentage = targetWood / totalTarget;
 var stonePercentage = targetStone / totalTarget;
 var ironPercentage = targetIron / totalTarget;
+
 if (typeof woodPercentage == 'undefined') {
     woodPercentage = 28000 / 83000;
     stonePercentage = 30000 / 83000;
     ironPercentage = 25000 / 83000;
 }
+
 var backgroundColor = "#36393f";
 var borderColor = "#3e4147";
 var headerColor = "#202225";
@@ -55,6 +61,7 @@ var langShinko = [
     "Send resources",
     "Created by Sophie 'Shinko to Kuma'"
 ];
+
 if (game_data.locale == "de_DE") {
     langShinko = [
         "Rohstoff-Versender für Flaggen-Boost-Münzen",
@@ -78,6 +85,7 @@ if (game_data.locale == "de_DE") {
         "Erstellt von Sophie 'Shinko to Kuma' (überarbeitet)"
     ];
 }
+
 if (game_data.locale == "en_DK") {
     langShinko = [
         "Resource sender for flag boost minting",
@@ -103,25 +111,25 @@ if (game_data.locale == "en_DK") {
 }
 if (game_data.locale == "el_GR") {
     langShinko = [
-        "Αποστολή πόρων",
-        "Εισάγετε τις συντεταγμένες - στόχο",
-        "Αποθήκευση",
-        "Δημιουργός",
-        "Παίκτης",
-        "Χωριό",
-        "Πόντοι",
-        "Στόχος",
-        "Διατήρησε το % Αποθήκης κάτω από",
-        "Υπολογισμός πόρων/αλλαγή στόχου",
-        "Αποστολή πόρων",
-        "Προέλευση",
-        "Χωριό στόχος",
-        "Απόσταση",
-        "Ξύλο",
-        "Πηλός",
-        "Σίδερο",
-        "Αποστολή πόρων",
-        "Δημιουργήθηκε από την Sophie 'Shinko to Kuma'"
+        "Î‘Ï€Î¿ÏƒÏ„Î¿Î»Î® Ï€ÏŒÏÏ‰Î½",
+        "Î•Î¹ÏƒÎ¬Î³ÎµÏ„Îµ Ï„Î¹Ï‚ ÏƒÏ…Î½Ï„ÎµÏ„Î±Î³Î¼Î­Î½ÎµÏ‚ - ÏƒÏ„ÏŒÏ‡Î¿",
+        "Î‘Ï€Î¿Î¸Î®ÎºÎµÏ…ÏƒÎ·",
+        "Î”Î·Î¼Î¹Î¿Ï…ÏÎ³ÏŒÏ‚",
+        "Î Î±Î¯ÎºÏ„Î·Ï‚",
+        "Î§Ï‰ÏÎ¹ÏŒ",
+        "Î ÏŒÎ½Ï„Î¿Î¹",
+        "Î£Ï„ÏŒÏ‡Î¿Ï‚",
+        "Î”Î¹Î±Ï„Î®ÏÎ·ÏƒÎµ Ï„Î¿ % Î‘Ï€Î¿Î¸Î®ÎºÎ·Ï‚ ÎºÎ¬Ï„Ï‰ Î±Ï€ÏŒ",
+        "Î¥Ï€Î¿Î»Î¿Î³Î¹ÏƒÎ¼ÏŒÏ‚ Ï€ÏŒÏÏ‰Î½/Î±Î»Î»Î±Î³Î® ÏƒÏ„ÏŒÏ‡Î¿Ï…",
+        "Î‘Ï€Î¿ÏƒÏ„Î¿Î»Î® Ï€ÏŒÏÏ‰Î½",
+        "Î ÏÎ¿Î­Î»ÎµÏ…ÏƒÎ·",
+        "Î§Ï‰ÏÎ¹ÏŒ ÏƒÏ„ÏŒÏ‡Î¿Ï‚",
+        "Î‘Ï€ÏŒÏƒÏ„Î±ÏƒÎ·",
+        "ÎžÏÎ»Î¿",
+        "Î Î·Î»ÏŒÏ‚",
+        "Î£Î¯Î´ÎµÏÎ¿",
+        "Î‘Ï€Î¿ÏƒÏ„Î¿Î»Î® Ï€ÏŒÏÏ‰Î½",
+        "Î”Î·Î¼Î¹Î¿Ï…ÏÎ³Î®Î¸Î·ÎºÎµ Î±Ï€ÏŒ Ï„Î·Î½ Sophie 'Shinko to Kuma'"
     ]
 }
 if (game_data.locale == "nl_NL") {
@@ -162,7 +170,7 @@ if (game_data.locale == "it_IT") {
         "Invia risorse",
         "Villaggio di origine",
         "Villaggio di destinazione",
-        "Distanza",
+        "Distanz",
         "Legno",
         "Argilla",
         "Ferro",
@@ -193,24 +201,27 @@ if (game_data.locale == "pt_BR") {
         "Criado por Sophie 'Shinko to Kuma'"
     ]
 }
+
 cssClassesSophie = `
 <style>
 .sophRowA { background-color: #2c2f33; color: #dcddde; border: 1px solid #3e4147; padding: 5px; }
 .sophRowB { background-color: #23272a; color: #dcddde; border: 1px solid #3e4147; padding: 5px; }
 .sophHeader { background-color: #202225; font-weight: bold; color: #ffffff; border: 1px solid #3e4147; padding: 5px; text-align: center; }
-input { background-color: #40444b; color: #dcddde; border: 1px solid #72767d; padding: 3px; border-radius: 3px; }
-button { background-color: #7289da; color: #ffffff; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px; }
+input { background-color: #40444b; color: #dcddde; border: 1px solid #72767d; padding: 2px; }
+button { background-color: #7289da; color: #ffffff; border: none; padding: 4px 8px; cursor: pointer; }
 button:hover { background-color: #5b6eae; }
-table { border-collapse: collapse; width: 100%; }
 </style>`
+
 $("#contentContainer").eq(0).prepend(cssClassesSophie);
 $("#mobileHeader").eq(0).prepend(cssClassesSophie);
+
 // resLimit speichern/laden
 if ("resLimit" in sessionStorage) {
     resLimit = parseInt(sessionStorage.getItem("resLimit"));
 } else {
     sessionStorage.setItem("resLimit", resLimit);
 }
+
 if (game_data.player.sitter > 0) {
     URLReq = `game.php?t=${game_data.player.id}&screen=overview_villages&mode=prod&page=-1&`;
 } else {
@@ -219,6 +230,7 @@ if (game_data.player.sitter > 0) {
 $.get(URLReq, function () {
     console.log("Managed to grab the page");
 }).done(function (page) {
+
     if ($("#mobileHeader")[0]) {
         console.log("mobile");
         allWoodObjects = $(page).find(".res.mwood,.warn_90.mwood,.warn.mwood");
@@ -287,6 +299,7 @@ $.get(URLReq, function () {
             farmSpaceTotal.push(allIronObjects[i].parentElement.nextElementSibling.nextElementSibling.nextElementSibling.innerText.match(/(\d*)\/(\d*)/)[2]);
         };
     }
+
     for (var i = 0; i < allVillages.length; i++) {
         villagesData.push({
             "id": allVillages[i].dataset.id,
@@ -303,8 +316,10 @@ $.get(URLReq, function () {
             "farmSpaceTotal": farmSpaceTotal[i]
         });
     };
+
     askCoordinate();
 });
+
 function askCoordinate() {
     var savedCoord = sessionStorage.getItem("coordinate") || "";
     var ownVillagesHtml = '<table style="width:100%; margin-top:10px;"><thead><tr><td class="sophHeader">Dorfname</td><td class="sophHeader">Koordinaten</td></tr></thead><tbody>';
@@ -345,11 +360,13 @@ function askCoordinate() {
         }
     });
 }
+
 function selectOwnVillage(index) {
     coordinate = villagesData[index].coord;
     $("#coordinateTargetFirstTime")[0].value = coordinate;
     $('#saveCoord').click();
 }
+
 function createList() {
     if ($("#sendResources")[0]) {
         $("#sendResources")[0].remove();
@@ -400,6 +417,7 @@ function createList() {
                 </div>`.trim();
     var uiDiv = document.createElement('div');
     uiDiv.innerHTML = htmlString;
+
     var htmlCode = `
             <div id="sendResources" border=0>
                 <table id="tableSend" width="100%">
@@ -422,6 +440,7 @@ function createList() {
                 </table>
             </div>
             `;
+
     $("#mobileHeader").eq(0).append(htmlCode);
     $("#contentContainer").eq(0).prepend(htmlCode);
     $("#mobileHeader").prepend(uiDiv.firstChild);
@@ -454,6 +473,7 @@ function createList() {
         reDo();
     });
     var listHTML = ``;
+
     $("#resourceSender").eq(0).prepend(`<table id="playerTarget" width="600">
     <tbody>
         <tr>
@@ -477,6 +497,7 @@ function createList() {
         </tr>
     </tbody>
 </table>`);
+
     for (var i = 0; i < villagesData.length; i++) {
         if (i % 2 == 0) {
             tempRow = " id='" + i + "' class='sophRowB'";
@@ -502,14 +523,19 @@ function createList() {
     formatTable();
     $(":button,#sendResources")[3].focus();
 }
+
 function sendResource(sourceID, targetID, woodAmount, stoneAmount, ironAmount, rowNr) {
     $(':button[id^="sendResources"]').prop('disabled', true);
-    setTimeout(function () { $("#" + rowNr)[0].remove(); $(':button[id^="sendResources"]').prop('disabled', false); $(":button,#sendResources")[3].focus(); if($("#tableSend tr").length<=2)
-    {
-        alert("Finished sending!");
-        if($(".btn-pp").length>0) $(".btn-pp").remove();
-        throw Error("Done.");
-    }}, 200);
+    setTimeout(function () { 
+        $("#" + rowNr)[0].remove(); 
+        $(':button[id^="sendResources"]').prop('disabled', false); 
+        $(":button,#sendResources")[3].focus(); 
+        if($("#tableSend tr").length<=2) {
+            alert("Finished sending!");
+            if($(".btn-pp").length>0) $(".btn-pp").remove();
+            throw Error("Done.");
+        }
+    }, 200);
     var e = { "target_id": targetID, "wood": woodAmount, "stone": stoneAmount, "iron": ironAmount };
     TribalWars.post("market", { ajaxaction: "map_send", village: sourceID }, e, function (e) {
         Dialog.close(),
@@ -520,20 +546,23 @@ function sendResource(sourceID, targetID, woodAmount, stoneAmount, ironAmount, r
         totalIronSent += ironAmount;
         $("#woodSent").eq(0).text(`${numberWithCommas(totalWoodSent)}`);
         $("#stoneSent").eq(0).text(`${numberWithCommas(totalStoneSent)}`);
-        $("#ironSent").eq(0).text`${numberWithCommas(totalIronSent)}`);
+        $("#ironSent").eq(0).text(`${numberWithCommas(totalIronSent)}`);
        }, !1);
 }
+
 function numberWithCommas(x) {
     x = x.toString();
     var pattern = /(-?\d+)(\d{3})/;
     while (pattern.test(x)) x = x.replace(pattern, "$1.$2");
     return x;
 }
+
 function checkDistance(x1, y1, x2, y2) {
     var a = x1 - x2;
     var b = y1 - y2;
     return Math.round(Math.hypot(a, b));
 }
+
 function calculateResAmounts(wood, stone, iron, warehouse, merchants) {
     var merchantCarry = merchants * 1000;
     leaveBehindRes = Math.floor(warehouse / 100 * resLimit);
@@ -549,6 +578,7 @@ function calculateResAmounts(wood, stone, iron, warehouse, merchants) {
     if (merchantIron > localIron) { perc = localIron / merchantIron; merchantWood *= perc; merchantStone *= perc; merchantIron *= perc; }
     return { "wood": Math.floor(merchantWood), "stone": Math.floor(merchantStone), "iron": Math.floor(merchantIron) }
 }
+
 function coordToId(coordinate) {
     if (game_data.player.sitter > 0) {
         sitterID = `game.php?t=${game_data.player.id}&screen=api&ajax=target_selection&input=${coordinate}&type=coord`;
@@ -563,13 +593,16 @@ function coordToId(coordinate) {
         createList();
     })
 }
+
 function reDo() { coordToId(coordinate); }
+
 function formatTable() {
     var tableRows = $("#tableSend tr");
     for (var i = 1; i < tableRows.length; i++) {
         tableRows[i].className = (i % 2 == 0) ? "sophRowB" : "sophRowA";
     }
 }
+
 function sortTableTest(n) {
     var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
     table = document.getElementById("tableSend");
