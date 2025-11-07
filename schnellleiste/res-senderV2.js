@@ -156,7 +156,7 @@ if (game_data.locale == "nl_NL") {
 if (game_data.locale == "it_IT") {
     langShinko = [
         "Script pushing per coniare",
-        "Inserire le coordinate a cui mandare resources",
+        "Inserire le coordinate a cui mandare risorse",
         "Salva",
         "Creatrice",
         "Giocatore",
@@ -165,21 +165,21 @@ if (game_data.locale == "it_IT") {
         "Coordinate a cui mandare",
         "Conserva % magazzino",
         "Ricalcola trasporti",
-        "Invia resources",
+        "Invia risorse",
         "Villaggio di origine",
         "Villaggio di destinazione",
-        "Distanza",
+        "Distanz",
         "Legno",
         "Argilla",
         "Ferro",
-        "Manda resources",
+        "Manda risorse",
         "Creato da Sophie 'Shinko to Kuma'"
     ]
 }
 if (game_data.locale == "pt_BR") {
     langShinko = [
-        "Enviar resources para cunhagem de moedas",
-        "Insira coordenada para enviar resources",
+        "Enviar recursos para cunhagem de moedas",
+        "Insira coordenada para enviar recursos",
         "Salvar",
         "Criador",
         "Jogador",
@@ -188,14 +188,14 @@ if (game_data.locale == "pt_BR") {
         "Enviar para",
         "Manter % no armazém",
         "Recalcular transporte",
-        "Enviar resources",
+        "Enviar recursos",
         "Origem",
         "Destino",
         "Distância",
         "Madeira",
         "Argila",
         "Ferro",
-        "Enviar resources",
+        "Enviar recursos",
         "Criado por Sophie 'Shinko to Kuma'"
     ]
 }
@@ -229,6 +229,7 @@ if (game_data.player.sitter > 0) {
 $.get(URLReq, function () {
     console.log("Managed to grab the page");
 }).done(function (page) {
+
     if ($("#mobileHeader")[0]) {
         console.log("mobile");
         allWoodObjects = $(page).find(".res.mwood,.warn_90.mwood,.warn.mwood");
@@ -323,24 +324,14 @@ function askCoordinate() {
     var ownVillagesHtml = '<table style="width:100%; margin-top:10px;"><thead><tr><td class="sophHeader">Dorfname</td><td class="sophHeader">Koordinaten</td></tr></thead><tbody>';
     for (var i = 0; i < villagesData.length; i++) {
         var rowClass = (i % 2 == 0) ? 'sophRowA' : 'sophRowB';
-        ownVillagesHtml += `<tr class="${rowClass}"><td><a href="#" onclick="selectOwnVillage(${i}); return false;" style="color:#40D0E0;">${villagesData[i].name}</a></td><td style="text-align:center;">${villagesData[i].coord}</td></tr>`;
+        ownVillagesHtml += `<tr class="${rowClass}"><td><a href="#" onclick="selectOwnVillage(${i}); return false;" style="color:#7289da;">${villagesData[i].name}</a></td><td style="text-align:center;">${villagesData[i].coord}</td></tr>`;
     }
     ownVillagesHtml += '</tbody></table>';
 
     var content = `<div style="max-width:1000px;">
-    <h2 class="popup_box_header">
-       <center><u>
-          <font color="darkgreen">${langShinko[0]}</font>
-          </u>
-       </center>
-    </h2>
+    <h2 class="popup_box_header"><center><u><font color="darkgreen">${langShinko[0]}</font></u></center></h2>
     <hr>
-    <p>
-    <center>
-       <font color=maroon><b>${langShinko[1]}</b>
-       </font>
-    </center>
-    </p>
+    <p><center><font color=maroon><b>${langShinko[1]}</b></font></center></p>
     <center>
        <table>
           <tr><td><input type="text" id="coordinateTargetFirstTime" size="20" value="${savedCoord}" placeholder="z.B. 500|500"></td></tr>
@@ -355,53 +346,41 @@ function askCoordinate() {
           <tr><td><button type="button" class="btn evt-cancel-btn btn-confirm-yes" id="saveCoord">${langShinko[2]}</button></td></tr>
        </table>
     </center>
-    <br>
-    <hr>
-    <center><img id="sophieImg" class="tooltip-delayed" title="<font color=darkgreen>Sophie -Shinko to Kuma-</font>" src="https://dl.dropboxusercontent.com/s/bxoyga8wa6yuuz4/sophie2.gif" style="cursor:help; position: relative"></center>
-    <br>
-    <center>
-       <p>${langShinko[18]}: <a href="https://shinko-to-kuma.my-free.website/" title="Sophie profile" target="_blank">Sophie "Shinko to Kuma"</a></p>
-    </center>
+    <br><hr>
+    <center><img id="sophieImg" class="tooltip-delayed" title="Sophie -Shinko to Kuma-" src="https://dl.dropboxusercontent.com/s/bxoyga8wa6yuuz4/sophie2.gif" style="cursor:help;"></center>
+    <br><center><p>${langShinko[18]}: <a href="https://shinko-to-kuma.my-free.website/" target="_blank" style="color:#7289da;">Sophie "Shinko to Kuma"</a></p></center>
  </div>`;
     Dialog.show('Supportfilter', content);
 
-    $('#showOwnVillages').click(function() {
-        $('#ownVillagesList').toggle();
-    });
+    $('#showOwnVillages').click(function() { $('#ownVillagesList').toggle(); });
     $('#showFriends').click(loadFriendsList);
     $('#showTribe').click(loadTribeList);
 
     $('#saveCoord').click(function () {
-        var inputCoord = $("#coordinateTargetFirstTime")[0].value.match(/\d+\|\d+/);
-        if (inputCoord) {
-            coordinate = inputCoord[0];
+        var input = $("#coordinateTargetFirstTime")[0].value.match(/\d+\|\d+/);
+        if (input) {
+            coordinate = input[0];
             sessionStorage.setItem("coordinate", coordinate);
-            var close_this = document.getElementsByClassName('popup_box_close');
-            close_this[0].click();
+            $('.popup_box_close')[0].click();
             coordToId(coordinate);
         } else {
-            alert("Ungültige Koordinaten!");
+            alert("Bitte gültige Koordinaten eingeben (z.B. 500|500)!");
         }
     });
 }
 
-// Freunde laden
 function loadFriendsList() {
     var friendsDiv = $('#friendsList');
     friendsDiv.show().html('<div>Lade Freunde...</div>');
-    var url = game_data.player.sitter > 0 ? `game.php?t=${game_data.player.id}&screen=buddies` : 'game.php?screen=buddies';
+    var url = game_data.player.sitter > 0 ? `game.php?t=${game_data.player.id}&screen=friend` : 'game.php?screen=friend';
     $.get(url).done(function(page) {
-        var rows = $(page).find('tbody tr');
+        var friendsTable = $(page).find('#friendList table'); // Anpassen, wenn Selektor falsch
         var html = '<table style="width:100%;"><thead><tr><td class="sophHeader">Freund</td></tr></thead><tbody>';
-        rows.each(function(i) {
+        friendsTable.find('tr').each(function(i) {
             if (i > 0) {
-                var nameTd = $(this).find('td').eq(1);
-                var nameLink = nameTd.find('a');
-                if (nameLink.length) {
-                    var name = nameLink.text().trim();
-                    var playerId = nameLink.attr('href').match(/id=(\d+)/)[1];
-                    html += `<tr class="${i % 2 == 0 ? 'sophRowA' : 'sophRowB'}"><td><a href="#" onclick="loadPlayerVillages(${playerId}, '${name}'); return false;" style="color:#40D0E0;">${name}</a></td></tr>`;
-                }
+                var name = $(this).find('td').eq(0).text().trim();
+                var playerId = $(this).find('a').attr('href').match(/player_id=(\d+)/)[1];
+                html += `<tr class="${i % 2 == 0 ? 'sophRowA' : 'sophRowB'}"><td><a href="#" onclick="loadFriendVillages(${playerId}, '${name}'); return false;" style="color:#7289da;">${name}</a></td></tr>`;
             }
         });
         html += '</tbody></table>';
@@ -409,23 +388,18 @@ function loadFriendsList() {
     }).fail(function() { friendsDiv.html('<div>Fehler beim Laden der Freunde.</div>'); });
 }
 
-// Stamm laden
 function loadTribeList() {
     var tribeDiv = $('#tribeList');
     tribeDiv.show().html('<div>Lade Stamm...</div>');
     var url = game_data.player.sitter > 0 ? `game.php?t=${game_data.player.id}&screen=ally&mode=members` : 'game.php?screen=ally&mode=members';
     $.get(url).done(function(page) {
-        var rows = $(page).find('table.vis tbody tr');
-        var html = '<table style="width:100%;"><thead><tr><td class="sophHeader">Stammmitglied</td></tr></thead><tbody>';
-        rows.each(function(i) {
+        var membersTable = $(page).find('#ally_members table'); // Anpassen, wenn Selektor falsch
+        var html = '<table style="width:100%;"><thead><tr><td class="sophHeader">Mitglied</td></tr></thead><tbody>';
+        membersTable.find('tr').each(function(i) {
             if (i > 0) {
-                var nameTd = $(this).find('td.lit-item').eq(0);
-                var nameLink = nameTd.find('a');
-                if (nameLink.length) {
-                    var name = nameLink.text().trim();
-                    var playerId = nameLink.attr('href').match(/id=(\d+)/)[1];
-                    html += `<tr class="${i % 2 == 0 ? 'sophRowA' : 'sophRowB'}"><td><a href="#" onclick="loadPlayerVillages(${playerId}, '${name}'); return false;" style="color:#40D0E0;">${name}</a></td></tr>`;
-                }
+                var name = $(this).find('td').eq(1).text().trim(); // Typisch Name in Spalte 2
+                var playerId = $(this).find('a').attr('href').match(/player_id=(\d+)/)[1];
+                html += `<tr class="${i % 2 == 0 ? 'sophRowA' : 'sophRowB'}"><td><a href="#" onclick="loadFriendVillages(${playerId}, '${name}'); return false;" style="color:#7289da;">${name}</a></td></tr>`;
             }
         });
         html += '</tbody></table>';
@@ -433,29 +407,19 @@ function loadTribeList() {
     }).fail(function() { tribeDiv.html('<div>Fehler beim Laden des Stamms.</div>'); });
 }
 
-// Dörfer eines Players laden
-function loadPlayerVillages(playerId, playerName) {
-    var villagesDiv = $('#ownVillagesList');
-    villagesDiv.html('<div>Lade Dörfer von ' + playerName + '...</div>').show();
+function loadFriendVillages(playerId, playerName) {
     $('#friendsList, #tribeList').hide();
-    var url = game_data.player.sitter > 0 ? `game.php?t=${game_data.player.id}&screen=info_player&id=${playerId}` : `game.php?screen=info_player&id=${playerId}`;
-    $.get(url).done(function(page) {
-        var rows = $(page).find('#villages_list tbody tr');
-        var html = '<table style="width:100%; margin-top:10px;"><thead><tr><td class="sophHeader">Dorf von ' + playerName + '</td><td class="sophHeader">Koordinaten</td></tr></thead><tbody>';
-        rows.each(function(i) {
-            var nameTd = $(this).find('td').eq(0);
-            var coordTd = $(this).find('td').eq(1);
-            var nameLink = nameTd.find('a');
-            var coord = coordTd.text().trim();
-            if (coord.match(/\d+\|\d+/)) {
-                var name = nameLink.length ? nameLink.text().trim() : 'Dorf';
-                var rowClass = (i % 2 == 0) ? 'sophRowA' : 'sophRowB';
-                html += `<tr class="${rowClass}"><td>${name}</td><td style="text-align:center;"><a href="#" onclick="selectExternalVillage('${coord}'); return false;" style="color:#40D0E0;">${coord}</a></td></tr>`;
-            }
-        });
-        html += '</tbody></table>';
-        villagesDiv.html(html);
-    }).fail(function() { villagesDiv.html('<div>Fehler beim Laden der Dörfer.</div>'); });
+    var villagesHtml = '<table style="width:100%; margin-top:10px;"><thead><tr><td class="sophHeader">Dorf von ' + playerName + '</td><td class="sophHeader">Koordinaten</td></tr></thead><tbody>';
+    var url = game_data.player.sitter > 0 ? `game.php?t=${game_data.player.id}&screen=api&ajax=target_selection&input=${playerId}&type=player` : `game.php?screen=api&ajax=target_selection&input=${playerId}&type=player`;
+    $.get(url).done(function(json) {
+        var data = parseFloat(game_data.majorVersion) > 8.217 ? json : JSON.parse(json);
+        for (var i = 0; i < data.villages.length; i++) {
+            var rowClass = (i % 2 == 0) ? 'sophRowA' : 'sophRowB';
+            villagesHtml += `<tr class="${rowClass}"><td>${data.villages[i].name}</td><td style="text-align:center;"><a href="#" onclick="selectExternalVillage('${data.villages[i].coord}'); return false;" style="color:#7289da;">${data.villages[i].coord}</a></td></tr>`;
+        }
+        villagesHtml += '</tbody></table>';
+        $('#ownVillagesList').html(villagesHtml).show();
+    }).fail(function() { alert('Fehler beim Laden der Dörfer.'); });
 }
 
 function selectExternalVillage(coord) {
@@ -600,13 +564,13 @@ function createList() {
         if (res.wood + res.stone + res.iron != 0 && villagesData[i].id != sendBack[0]) {
             listHTML += `
         <tr ${tempRow} height="40">
-            <td><a href="${villagesData[i].url}" style="color:#40D0E0;">${villagesData[i].name} </a></td>
-            <td> <a href="" style="color:#40D0E0;">${sendBack[1]}</a> </td>
+            <td><a href="${villagesData[i].url}" style="color:#7289da;">${villagesData[i].name}</a></td>
+            <td><a href="" style="color:#7289da;">${sendBack[1]}</a></td>
             <td>${checkDistance(sendBack[5], sendBack[6], villagesData[i].coord.substring(0, 3), villagesData[i].coord.substring(4, 7))}</td>
-            <td width="50" style="text-align:center">${res.wood}<span class="icon header wood"> </span></td>
-            <td width="50" style="text-align:center">${res.stone}<span class="icon header stone"> </span></td>
-            <td width="50" style="text-align:center">${res.iron}<span class="icon header iron"> </span></td>
-            <td style="text-align:center"><input type="button" class="btn evt-confirm-btn btn-confirm-yes" id="sendResources" value="${langShinko[17]}" onclick=sendResource(${villagesData[i].id},${sendBack[0]},${res.wood},${res.stone},${res.iron},${i})></td>
+            <td width="50" style="text-align:center">${res.wood}<span class="icon header wood"></span></td>
+            <td width="50" style="text-align:center">${res.stone}<span class="icon header stone"></span></td>
+            <td width="50" style="text-align:center">${res.iron}<span class="icon header iron"></span></td>
+            <td style="text-align:center"><input type="button" class="btn evt-confirm-btn btn-confirm-yes" value="${langShinko[17]}" onclick=sendResource(${villagesData[i].id},${sendBack[0]},${res.wood},${res.stone},${res.iron},${i})></td>
         </tr>`
         }
     }
@@ -618,11 +582,16 @@ function createList() {
 
 function sendResource(sourceID, targetID, woodAmount, stoneAmount, ironAmount, rowNr) {
     $(':button[id^="sendResources"]').prop('disabled', true);
-    setTimeout(function () { $("#" + rowNr)[0].remove(); $(':button[id^="sendResources"]').prop('disabled', false); $(":button,#sendResources")[3].focus(); if($("#tableSend tr").length<=2) {
-        alert("Finished sending!");
-        if($(".btn-pp").length>0) $(".btn-pp").remove();
-        throw Error("Done.");
-    } }, 200);
+    setTimeout(function () { 
+        $("#" + rowNr)[0].remove(); 
+        $(':button[id^="sendResources"]').prop('disabled', false); 
+        $(":button,#sendResources")[3].focus(); 
+        if($("#tableSend tr").length<=2) {
+            alert("Finished sending!");
+            if($(".btn-pp").length>0) $(".btn-pp").remove();
+            throw Error("Done.");
+        }
+    }, 200);
     var e = { "target_id": targetID, "wood": woodAmount, "stone": stoneAmount, "iron": ironAmount };
     TribalWars.post("market", { ajaxaction: "map_send", village: sourceID }, e, function (e) {
         Dialog.close(),
