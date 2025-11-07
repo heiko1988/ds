@@ -202,9 +202,12 @@ if (game_data.locale == "pt_BR") {
 
 cssClassesSophie = `
 <style>
-.sophRowA { background-color: #32353b; color: white; }
-.sophRowB { background-color: #36393f; color: white; }
-.sophHeader { background-color: #202225; font-weight: bold; color: white; }
+.sophRowA { background-color: #2c2f33; color: #dcddde; border: 1px solid #3e4147; padding: 5px; }
+.sophRowB { background-color: #23272a; color: #dcddde; border: 1px solid #3e4147; padding: 5px; }
+.sophHeader { background-color: #202225; font-weight: bold; color: #ffffff; border: 1px solid #3e4147; padding: 5px; text-align: center; }
+input { background-color: #40444b; color: #dcddde; border: 1px solid #72767d; padding: 2px; }
+button { background-color: #7289da; color: #ffffff; border: none; padding: 4px 8px; cursor: pointer; }
+button:hover { background-color: #5b6eae; }
 </style>`
 
 $("#contentContainer").eq(0).prepend(cssClassesSophie);
@@ -369,28 +372,32 @@ function createList() {
     }
     var htmlString = `
                 <div id="resourceSender">
-                    <table id="Settings" width="600">
+                    <table id="Settings" width="100%">
                         <thead>
                             <tr>
                                 <td class="sophHeader">${langShinko[7]}</td>
                                 <td class="sophHeader">${langShinko[8]}</td>
-                                <td class="sophHeader"></td>
-                                <td class="sophHeader"></td>
-                                <td class="sophHeader"></td>
+                                <td class="sophHeader">Zielmenge Holz</td>
+                                <td class="sophHeader">Zielmenge Lehm</td>
+                                <td class="sophHeader">Zielmenge Eisen</td>
                             </tr>
                         </thead>
                         <tbody>
-                        <tr >
+                        <tr>
                             <td class="sophRowA">
-                                <input type="text" id="coordinateTarget" name="coordinateTarget" size="10" margin="5" align=left value="${coordinate || ''}">
+                                <input type="text" id="coordinateTarget" name="coordinateTarget" size="10" margin="5" align="left" value="${coordinate || ''}">
                             </td>
                             <td class="sophRowA" align="right">
-                                <input type="text" id="resPercent" name="resPercent" size="1" align=right value="${resLimit || ''}">%
+                                <input type="text" id="resPercent" name="resPercent" size="3" align="right" value="${resLimit || ''}">%
                             </td>
-                            <td class="sophRowA" colspan="3">
-                                <span class="icon header wood"></span> <input type="number" id="targetWood" size="8" value="${targetWood}"> 
-                                <span class="icon header stone"></span> <input type="number" id="targetStone" size="8" value="${targetStone}"> 
-                                <span class="icon header iron"></span> <input type="number" id="targetIron" size="8" value="${targetIron}">
+                            <td class="sophRowA">
+                                <input type="number" id="targetWood" size="8" value="${targetWood}">
+                            </td>
+                            <td class="sophRowA">
+                                <input type="number" id="targetStone" size="8" value="${targetStone}">
+                            </td>
+                            <td class="sophRowA">
+                                <input type="number" id="targetIron" size="8" value="${targetIron}">
                             </td>
                             <td class="sophRowA" margin="5">
                                 <button type="button" id="button" class="btn-confirm-yes">${langShinko[2]}</button>
@@ -404,7 +411,7 @@ function createList() {
                             </tr>
                         </tbody>
                     </table>
-                    </br>
+                    <br>
                 </div>`.trim();
     var uiDiv = document.createElement('div');
     uiDiv.innerHTML = htmlString;
