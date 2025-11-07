@@ -13,12 +13,26 @@ var totalsAndAverages = "";
 var data, totalWood = 0, totalStone = 0, totalIron = 0, resLimit = 0;
 var sendBack;
 var totalWoodSent = 0; totalStoneSent = 0; totalIronSent = 0;
+
+// Standardwerte für Münzen
+var defaultWood = 28000;
+var defaultStone = 30000;
+var defaultIron = 25000;
+
+// Benutzerwerte laden
+var targetWood = parseInt(sessionStorage.getItem("targetWood")) || defaultWood;
+var targetStone = parseInt(sessionStorage.getItem("targetStone")) || defaultStone;
+var targetIron = parseInt(sessionStorage.getItem("targetIron")) || defaultIron;
+var totalTarget = targetWood + targetStone + targetIron;
+var woodPercentage = targetWood / totalTarget;
+var stonePercentage = targetStone / totalTarget;
+var ironPercentage = targetIron / totalTarget;
+
 if (typeof woodPercentage == 'undefined') {
     woodPercentage = 28000 / 83000;
     stonePercentage = 30000 / 83000;
     ironPercentage = 25000 / 83000;
 }
-// percentages for coins, 83000 is how much all 3 is combined
 
 var backgroundColor = "#36393f";
 var borderColor = "#3e4147";
@@ -46,7 +60,6 @@ var langShinko = [
     "Created by Sophie 'Shinko to Kuma'"
 ];
 
-// DEUTSCHE ÜBERSETZUNG
 if (game_data.locale == "de_DE") {
     langShinko = [
         "Rohstoff-Versender für Flaggen-Boost-Münzen",
@@ -71,7 +84,6 @@ if (game_data.locale == "de_DE") {
     ];
 }
 
-// Weitere Sprachen (Original)
 if (game_data.locale == "en_DK") {
     langShinko = [
         "Resource sender for flag boost minting",
@@ -174,12 +186,12 @@ if (game_data.locale == "pt_BR") {
         "Aldeia",
         "Pontos",
         "Enviar para",
-        "Manter % no armazÃ©m",
+        "Manter % no armazém",
         "Recalcular transporte",
         "Enviar recursos",
         "Origem",
         "Destino",
-        "DistÃ¢ncia",
+        "Distância",
         "Madeira",
         "Argila",
         "Ferro",
@@ -205,7 +217,6 @@ if ("resLimit" in sessionStorage) {
     sessionStorage.setItem("resLimit", resLimit);
 }
 
-// AJAX: Dorfübersicht laden
 if (game_data.player.sitter > 0) {
     URLReq = `game.php?t=${game_data.player.id}&screen=overview_villages&mode=prod&page=-1&`;
 } else {
@@ -224,7 +235,6 @@ $.get(URLReq, function () {
         allVillages = $(page).find(".quickedit-vn");
         allFarms = $(page).find(".header.population");
         allMerchants = $(page).find('a[href*="market"]');
-
         for (var i = 0; i < allWoodObjects.length; i++) {
             n = allWoodObjects[i].textContent;
             n = n.replace(/\./g, '').replace(',', '');
@@ -244,9 +254,7 @@ $.get(URLReq, function () {
             warehouseCapacity.push(allWarehouses[i].parentElement.innerText);
         };
         for (var i = 0; i < allVillages.length; i++) {
-            for (var j = 1; j < allMerchants.length; j++) {
-                availableMerchants.push(allMerchants[j].innerText);
-            }
+            availableMerchants.push(allMerchants[i].innerText);
             totalMerchants.push("999");
         };
         for (var i = 0; i < allVillages.length; i++) {
@@ -259,7 +267,6 @@ $.get(URLReq, function () {
         allClayObjects = $(page).find(".res.stone,.warn_90.stone,.warn.stone");
         allIronObjects = $(page).find(".res.iron,.warn_90.iron,.warn.iron")
         allVillages = $(page).find(".quickedit-vn");
-
         for (var i = 0; i < allWoodObjects.length; i++) {
             n = allWoodObjects[i].textContent;
             n = n.replace(/\./g, '').replace(',', '');
@@ -305,11 +312,9 @@ $.get(URLReq, function () {
         });
     };
 
-    // Jetzt: Dialog öffnen
     askCoordinate();
 });
 
-// NEU: Erweiterter Dialog mit eigener Dörfer-Liste
 function askCoordinate() {
     var savedCoord = sessionStorage.getItem("coordinate") || "";
     var ownVillagesHtml = '<table style="width:100%; margin-top:10px;"><thead><tr><td class="sophHeader">Dorfname</td><td class="sophHeader">Koordinaten</td></tr></thead><tbody>';
@@ -318,7 +323,6 @@ function askCoordinate() {
         ownVillagesHtml += `<tr class="${rowClass}"><td><a href="#" onclick="selectOwnVillage(${i}); return false;" style="color:#40D0E0;">${villagesData[i].name}</a></td><td style="text-align:center;">${villagesData[i].coord}</td></tr>`;
     }
     ownVillagesHtml += '</tbody></table>';
-
     var content = `<div style="max-width:1000px;">
     <h2 class="popup_box_header"><center><u><font color="darkgreen">${langShinko[0]}</font></u></center></h2>
     <hr>
@@ -335,13 +339,10 @@ function askCoordinate() {
     <center><img id="sophieImg" class="tooltip-delayed" title="Sophie -Shinko to Kuma-" src="https://dl.dropboxusercontent.com/s/bxoyga8wa6yuuz4/sophie2.gif" style="cursor:help;"></center>
     <br><center><p>${langShinko[18]}: <a href="https://shinko-to-kuma.my-free.website/" target="_blank">Sophie "Shinko to Kuma"</a></p></center>
  </div>`;
-
     Dialog.show('Supportfilter', content);
-
     $('#showOwnVillages').click(function() {
         $('#ownVillagesList').toggle();
     });
-
     $('#saveCoord').click(function () {
         var input = $("#coordinateTargetFirstTime")[0].value.match(/\d+\|\d+/);
         if (input) {
@@ -355,14 +356,11 @@ function askCoordinate() {
     });
 }
 
-// NEU: Dorf aus Liste wählen
 function selectOwnVillage(index) {
     coordinate = villagesData[index].coord;
     $("#coordinateTargetFirstTime")[0].value = coordinate;
     $('#saveCoord').click();
 }
-
-// --- AB HIER 100% ORIGINALCODE (UNVERÄNDERT) ---
 
 function createList() {
     if ($("#sendResources")[0]) {
@@ -378,36 +376,45 @@ function createList() {
                                 <td class="sophHeader">${langShinko[8]}</td>
                                 <td class="sophHeader"></td>
                                 <td class="sophHeader"></td>
+                                <td class="sophHeader"></td>
                             </tr>
                         </thead>
                         <tbody>
                         <tr >
                             <td class="sophRowA">
-                                <input type="text" ID="coordinateTarget" name="coordinateTarget" size="20" margin="5" align=left>
+                                <input type="text" id="coordinateTarget" name="coordinateTarget" size="10" margin="5" align=left value="${coordinate || ''}">
                             </td>
                             <td class="sophRowA" align="right">
-                                <input type="text" ID="resPercent" name="resPercent" size="1" align=right>%
+                                <input type="text" id="resPercent" name="resPercent" size="1" align=right value="${resLimit || ''}">%
+                            </td>
+                            <td class="sophRowA" colspan="3">
+                                <span class="icon header wood"></span> <input type="number" id="targetWood" size="8" value="${targetWood}"> 
+                                <span class="icon header stone"></span> <input type="number" id="targetStone" size="8" value="${targetStone}"> 
+                                <span class="icon header iron"></span> <input type="number" id="targetIron" size="8" value="${targetIron}">
                             </td>
                             <td class="sophRowA" margin="5">
-                                <button type="button" ID="button" class="btn-confirm-yes" >${langShinko[2]}</button>
+                                <button type="button" id="button" class="btn-confirm-yes">${langShinko[2]}</button>
                             </td>
                             <td class="sophRowA">
-                                <button type="button" ID="sendRes" class="btn" name="sendRes" onclick=reDo()> ${langShinko[9]}</button>
+                                <button type="button" id="resetDefaults" class="btn">Standard</button>
+                            </td>
+                            <td class="sophRowA">
+                                <button type="button" id="sendRes" class="btn" name="sendRes" onclick="reDo()">${langShinko[9]}</button>
                             </td>
                             </tr>
                         </tbody>
                     </table>
                     </br>
                 </div>`.trim();
-    uiDiv = document.createElement('div');
+    var uiDiv = document.createElement('div');
     uiDiv.innerHTML = htmlString;
 
-    htmlCode = `
+    var htmlCode = `
             <div id="sendResources" border=0>
                 <table id="tableSend" width="100%">
                     <tbody id="appendHere">
                         <tr>
-                            <td class="sophHeader" colspan=7 width="550" style="text-align:center" >${langShinko[10]}</td>
+                            <td class="sophHeader" colspan=7 width="550" style="text-align:center">${langShinko[10]}</td>
                         </tr>
                         <tr>
                             <td class="sophHeader" width="25%" style="text-align:center">${langShinko[11]}</td>
@@ -430,34 +437,52 @@ function createList() {
     $("#mobileHeader").prepend(uiDiv.firstChild);
     $("#contentContainer").prepend(uiDiv.firstChild);
     $("#resPercent")[0].value = resLimit;
-    $("#coordinateTarget")[0].value = coordinate;
-
-    $('#button').click(function () {
-        coordinate = $("#coordinateTarget")[0].value.match(/\d+\|\d+/)[0];
-        sessionStorage.setItem("coordinate", coordinate);
-        resLimit = $("#resPercent")[0].value;
-        sessionStorage.setItem("resLimit", resLimit);
+    $("#targetWood")[0].value = targetWood;
+    $("#targetStone")[0].value = targetStone;
+    $("#targetIron")[0].value = targetIron;
+    $('#resetDefaults').click(function () {
+        $("#targetWood")[0].value = defaultWood;
+        $("#targetStone")[0].value = defaultStone;
+        $("#targetIron")[0].value = defaultIron;
+        $('#button').click();
     });
-    listHTML = ``;
+    $('#button').click(function () {
+        coordinate = $("#coordinateTarget")[0].value.match(/\d+\|\d+/)[0] || coordinate;
+        resLimit = parseInt($("#resPercent")[0].value) || 0;
+        targetWood = parseInt($("#targetWood")[0].value) || defaultWood;
+        targetStone = parseInt($("#targetStone")[0].value) || defaultStone;
+        targetIron = parseInt($("#targetIron")[0].value) || defaultIron;
+        totalTarget = targetWood + targetStone + targetIron;
+        woodPercentage = targetWood / totalTarget;
+        stonePercentage = targetStone / totalTarget;
+        ironPercentage = targetIron / totalTarget;
+        sessionStorage.setItem("coordinate", coordinate);
+        sessionStorage.setItem("resLimit", resLimit);
+        sessionStorage.setItem("targetWood", targetWood);
+        sessionStorage.setItem("targetStone", targetStone);
+        sessionStorage.setItem("targetIron", targetIron);
+        reDo();
+    });
+    var listHTML = ``;
 
     $("#resourceSender").eq(0).prepend(`<table id="playerTarget" width="600">
     <tbody>
         <tr>
-            <td class="sophHeader" rowspan="3"><img src="`+ sendBack[2] + `"></td>
+            <td class="sophHeader" rowspan="3"><img src="${sendBack[2]}"></td>
             <td class="sophHeader">${langShinko[4]}:</td>
-            <td class="sophRowA">`+ sendBack[3] + `</td>
+            <td class="sophRowA">${sendBack[3]}</td>
             <td class="sophHeader"><span class="icon header wood"> </span></td>
             <td class="sophRowB" id="woodSent"></td>
         </tr>
         <tr>
             <td class="sophHeader">${langShinko[5]}:</td>
-            <td class="sophRowB">`+ sendBack[1] + `</td>
+            <td class="sophRowB">${sendBack[1]}</td>
             <td class="sophHeader"><span class="icon header stone"> </span></td>
             <td class="sophRowA" id="stoneSent"></td>
         </tr>
         <tr>
             <td class="sophHeader">${langShinko[6]}: </td>
-            <td class="sophRowA">`+ sendBack[4] + `</td>
+            <td class="sophRowA">${sendBack[4]}</td>
             <td class="sophHeader"><span class="icon header iron"> </span></td>
             <td class="sophRowB" id="ironSent"></td>
         </tr>
@@ -492,12 +517,16 @@ function createList() {
 
 function sendResource(sourceID, targetID, woodAmount, stoneAmount, ironAmount, rowNr) {
     $(':button[id^="sendResources"]').prop('disabled', true);
-    setTimeout(function () { $("#" + rowNr)[0].remove(); $(':button[id^="sendResources"]').prop('disabled', false); $(":button,#sendResources")[3].focus(); if($("#tableSend tr").length<=2)
-    {
-        alert("Finished sending!");
-        if($(".btn-pp").length>0) $(".btn-pp").remove(); 
-        throw Error("Done.");
-    }}, 200);
+    setTimeout(function () { 
+        $("#" + rowNr)[0].remove(); 
+        $(':button[id^="sendResources"]').prop('disabled', false); 
+        $(":button,#sendResources")[3].focus(); 
+        if($("#tableSend tr").length<=2) {
+            alert("Finished sending!");
+            if($(".btn-pp").length>0) $(".btn-pp").remove();
+            throw Error("Done.");
+        }
+    }, 200);
     var e = { "target_id": targetID, "wood": woodAmount, "stone": stoneAmount, "iron": ironAmount };
     TribalWars.post("market", { ajaxaction: "map_send", village: sourceID }, e, function (e) {
         Dialog.close(),
