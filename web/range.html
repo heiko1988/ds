@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stämme Nähe-Scanner | dep20</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1a1a1a; color: #e0e0e0; font-family: 'Segoe UI', sans-serif;
+            padding: 20px; line-height: 1.6;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { text-align: center; color: #ffd700; margin-bottom: 30px; font-size: 2.2em; text-shadow: 0 0 10px #ffd700; }
+        .controls {
+            background: #2a2a2a; border: 1px solid #444; border-radius: 10px; padding: 20px; margin-bottom: 20px;
+            display: flex; gap: 15px; flex-wrap: wrap; align-items: center;
+        }
+        input, select, button, label {
+            padding: 12px 16px; border: 1px solid #555; border-radius: 6px; background: #333; color: #e0e0e0;
+            font-size: 16px;
+        }
+        input[type="checkbox"] { padding: 0; width: auto; }
+        label { padding: 12px; background: none; border: none; font-size: 16px; display: flex; align-items: center; gap: 5px; }
+        input:focus, select:focus { border-color: #ffd700; outline: none; box-shadow: 0 0 5px #ffd700; }
+        button {
+            background: linear-gradient(145deg, #ffd700, #ffed4e); color: #000; font-weight: bold; cursor: pointer;
+            border: none; transition: all 0.3s;
+        }
+        button:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(255,215,0,0.4); }
+        button#reloadBtn { background: #c00; }
+        button#reloadBtn:hover { background: #e00; }
+        button#saveBundnis { background: #00c; margin-left: 10px; padding: 8px 12px; }
+        .status { margin-left: 15px; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 0.95em; flex: 1; }
+        .loading { background: #444; color: #ffd700; }
+        .error { background: #660000; color: #ff9999; }
+        .success { background: #004400; color: #99ff99; }
+        .cache { font-size: 0.8em; color: #aaa; text-align: center; margin: 10px 0; }
+        #results { overflow-x: auto; border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: #2a2a2a; margin-bottom: 20px; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid #444; }
+        th { background: linear-gradient(145deg, #333, #444); font-weight: bold; color: #ffd700; position: sticky; top: 0; }
+        tr:hover { background: #3a3a3a; }
+        .rank { font-weight: bold; color: #ffd700; width: 50px; }
+        .dist { color: #ffaa00; font-weight: bold; }
+        .points { color: #4dff4d; }
+        .villages { color: #aaa; }
+        .attackable { color: #00ff00; font-weight: bold; }
+        .not-attackable { color: #ff0000; font-weight: bold; }
+        .map-link {
+            background: #ffd700; color: #000; padding: 4px 8px; border-radius: 4px; text-decoration: none;
+            font-weight: bold; display: inline-block; transition: all 0.3s; font-size: 0.8em;
+        }
+        .map-link:hover { background: #ffed4e; transform: scale(1.05); }
+        .village-list {
+            background: #1a1a1a; border-radius: 6px; padding: 8px; margin-top: 5px;
+            max-height: 200px; overflow-y: auto; font-size: 0.85em; line-height: 1.4;
+        }
+        .village-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; gap: 10px; }
+        .stamm { color: #cccccc; font-style: italic; }
+        .bundnis-container { display: flex; flex-direction: column; align-items: start; gap: 10px; }
+        .bundnis-list { background: #333; border: 1px solid #555; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto; }
+        .bundnis-item { display: flex; align-items: center; gap: 5px; margin-bottom: 5px; }
+        #bundnisSearch { min-width: 200px; }
+        @media (max-width: 768px) {
+            .controls { flex-direction: column; align-items: stretch; }
+            .status { margin: 10px 0 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Stämme Nähe-Scanner | dep20</h1>
+        
+        <div class="controls">
+            <input type="text" id="playerName" placeholder="Dein Spielername (z.B. FSV+King)">
+            <select id="range">
+                <option value="10">±10 Felder</option>
+                <option value="20" selected>±20 Felder</option>
+                <option value="30">±30 Felder</option>
+                <option value="50">±50 Felder</option>
+            </select>
+            <select id="topN">
+                <option value="5">Top 5 pro Dorf</option>
+                <option value="10" selected>Top 10 pro Dorf</option>
+                <option value="20">Top 20 pro Dorf</option>
+            </select>
+            <select id="sort">
+                <option value="dist">Entfernung ↑</option>
+                <option value="dist-desc">Entfernung ↓</option>
+                <option value="points-desc">Punkte ↓</option>
+                <option value="points">Punkte ↑</option>
+                <option value="villcount">Dörfer in Range ↑</option>
+            </select>
+            <label for="onlyAttackable"><input type="checkbox" id="onlyAttackable"> Nur angreifbare</label>
+            <label for="noIntern"><input type="checkbox" id="noIntern"> Keine Stammesinternen</label>
+            <label for="noBundnis"><input type="checkbox" id="noBundnis"> Keine Bündnis/NAP</label>
+            <div class="bundnis-container">
+                <input type="text" id="bundnisSearch" placeholder="Stamm suchen...">
+                <div class="bundnis-list" id="bundnisList"></div>
+                <button id="saveBundnis">Speichern</button>
+            </div>
+            <button onclick="scan()">🔍 SCANNEN</button>
+            <button id="reloadBtn" onclick="forceReload()">DATEN NEU LADEN</button>
+            <div class="status" id="status">Lade Cache...</div>
+        </div>
+
+        <div class="cache" id="cacheInfo"></div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // ORIGINALE URLS – Cache-Buster wird IN die originale URL gehängt!
+        const VILLAGE_ORIG = 'https://dep20.die-staemme.de/map/village.txt';
+        const PLAYER_ORIG = 'https://dep20.die-staemme.de/map/player.txt';
+        const ALLY_ORIG = 'https://dep20.die-staemme.de/map/ally.txt';
+
+        // Cache Keys
+        const CACHE_VILLAGE = 'staemme_village_dep20';
+        const CACHE_PLAYER = 'staemme_player_dep20';
+        const CACHE_ALLY = 'staemme_ally_dep20';
+        const CACHE_TIME = 'staemme_cache_time_dep20';
+        const CACHE_BUNDNIS = 'staemme_bundnis_dep20';
+
+        const statusEl = document.getElementById('status');
+        const cacheInfo = document.getElementById('cacheInfo');
+        const resultsEl = document.getElementById('results');
+        const bundnisSearch = document.getElementById('bundnisSearch');
+        const bundnisList = document.getElementById('bundnisList');
+        const saveBundnis = document.getElementById('saveBundnis');
+
+        function setStatus(msg, type = 'loading') {
+            statusEl.textContent = msg;
+            statusEl.className = `status ${type}`;
+        }
+
+        function updateCacheInfo() {
+            const time = localStorage.getItem(CACHE_TIME);
+            if (time) {
+                const date = new Date(parseInt(time));
+                cacheInfo.textContent = `Daten vom: ${date.toLocaleString()} | "DATEN NEU LADEN" zum Aktualisieren`;
+            } else {
+                cacheInfo.textContent = 'Kein Cache – lade Daten...';
+            }
+        }
+
+        function saveCache(key, data) {
+            try {
+                localStorage.setItem(key, data);
+                localStorage.setItem(CACHE_TIME, Date.now().toString());
+                updateCacheInfo();
+            } catch (e) {
+                console.warn("Cache voll", e);
+            }
+        }
+
+        function getCache(key) {
+            return localStorage.getItem(key);
+        }
+
+        async function fetchWithCache(origUrl, cacheKey) {
+            const cached = getCache(cacheKey);
+            if (cached) {
+                setStatus('Daten aus Cache...', 'success');
+                return cached;
+            }
+
+            // Cache-Buster in ORIGINALE URL
+            const timedUrl = origUrl + '?t=' + Date.now();
+            // Nun proxy
+            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(timedUrl);
+
+            setStatus('Lade live via corsproxy.io...');
+            try {
+                const res = await fetch(proxyUrl);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const text = await res.text();
+                saveCache(cacheKey, text);
+                setStatus('Live-Daten geladen & gecacht!', 'success');
+                return text;
+            } catch (err) {
+                throw new Error(`Netzwerk: ${err.message}`);
+            }
+        }
+
+        window.forceReload = async function() {
+            localStorage.removeItem(CACHE_VILLAGE);
+            localStorage.removeItem(CACHE_PLAYER);
+            localStorage.removeItem(CACHE_ALLY);
+            localStorage.removeItem(CACHE_TIME);
+            setStatus('Cache gelöscht – lade neu...', 'loading');
+            updateCacheInfo();
+            await loadData();
+        };
+
+        async function loadData() {
+            try {
+                const [villageText, playerText, allyText] = await Promise.all([
+                    fetchWithCache(VILLAGE_ORIG, CACHE_VILLAGE),
+                    fetchWithCache(PLAYER_ORIG, CACHE_PLAYER),
+                    fetchWithCache(ALLY_ORIG, CACHE_ALLY)
+                ]);
+                return { villageText, playerText, allyText };
+            } catch (err) {
+                setStatus('Fehler: ' + err.message, 'error');
+                console.error(err);
+                return null;
+            }
+        }
+
+        function parseLines(text) {
+            return text.trim().split('\n')
+                .map(l => l.trim())
+                .filter(l => l && l !== '---' && !l.startsWith('#'));
+        }
+
+        function decodeName(name) {
+            try { return decodeURIComponent(name.replace(/\+/g, ' ')); }
+            catch { return name; }
+        }
+
+        // Funktion für Angreifbar-Check (±20%)
+        function isAttackable(myPoints, oppPoints) {
+            const minPoints = Math.min(myPoints, oppPoints);
+            const maxPoints = Math.max(myPoints, oppPoints);
+            const diffPercent = ((maxPoints - minPoints) / minPoints) * 100;
+            const isAttack = maxPoints <= minPoints * 1.2;
+            return { isAttack, diffPercent: diffPercent.toFixed(1) };
+        }
+
+        // Bündnis-Stämme laden und Checkboxen füllen
+        async function loadBundnisCheckboxes(stammMap) {
+            bundnisList.innerHTML = '';
+            const selectedBundnis = JSON.parse(localStorage.getItem(CACHE_BUNDNIS) || '[]');
+
+            const sortedStamme = Array.from(stammMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+            sortedStamme.forEach(([id, name]) => {
+                const div = document.createElement('div');
+                div.className = 'bundnis-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="bundnis_${id}" value="${id}" ${selectedBundnis.includes(id) ? 'checked' : ''}>
+                    <label for="bundnis_${id}">${name}</label>
+                `;
+                bundnisList.appendChild(div);
+            });
+        }
+
+        // Suchfunktion für Bündnis-Checkboxen
+        bundnisSearch.addEventListener('input', () => {
+            const filter = bundnisSearch.value.toLowerCase();
+            Array.from(bundnisList.children).forEach(item => {
+                const label = item.querySelector('label').textContent.toLowerCase();
+                item.style.display = label.includes(filter) ? 'flex' : 'none';
+            });
+        });
+
+        // Speichern der Bündnis-Auswahl
+        saveBundnis.addEventListener('click', () => {
+            const selected = Array.from(bundnisList.querySelectorAll('input:checked')).map(input => parseInt(input.value));
+            localStorage.setItem(CACHE_BUNDNIS, JSON.stringify(selected));
+            setStatus('Bündnis-Stämme gespeichert!', 'success');
+        });
+
+        window.scan = async function() {
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) return alert('Spielernamen eingeben!');
+
+            const range = parseInt(document.getElementById('range').value);
+            const topN = parseInt(document.getElementById('topN').value);
+            const sortBy = document.getElementById('sort').value;
+            const onlyAttackable = document.getElementById('onlyAttackable').checked;
+            const noIntern = document.getElementById('noIntern').checked;
+            const noBundnis = document.getElementById('noBundnis').checked;
+
+            setStatus('Lade Daten...');
+            resultsEl.innerHTML = '';
+
+            const data = await loadData();
+            if (!data) return;
+
+            try {
+                const { villageText, playerText, allyText } = data;
+
+                const villageLines = parseLines(villageText);
+                const playerLines = parseLines(playerText);
+                const allyLines = parseLines(allyText);
+
+                if (villageLines.length === 0 || playerLines.length === 0) {
+                    throw new Error('Dateien leer – Welt ist zu neu oder noch keine Daten.');
+                }
+
+                // --- ALLY.TXT: Stamm-ID → Name Map ---
+                const stammMap = new Map();
+                for (const line of allyLines) {
+                    const a = line.split(',');
+                    if (a.length < 2) continue;
+                    const stammId = parseInt(a[0]);
+                    const name = decodeName(a[1]);
+                    stammMap.set(stammId, name);
+                }
+
+                // Bündnis-Checkboxen füllen
+                await loadBundnisCheckboxes(stammMap);
+
+                // Bündnis-Stämme laden
+                const bundnisIds = JSON.parse(localStorage.getItem(CACHE_BUNDNIS) || '[]');
+
+                // --- PLAYER.TXT: PID, Gesamtpunkte & Stamm-ID finden ---
+                let myPid = null;
+                let myTotalPoints = 0;
+                let myStammId = 0;
+                const playerMap = new Map();
+
+                for (const line of playerLines) {
+                    const p = line.split(',');
+                    if (p.length < 6) continue;
+                    const pid = parseInt(p[0]);
+                    const name = decodeName(p[1]);
+                    const stammId = parseInt(p[2]) || 0;
+                    const points = parseInt(p[4]) || 0;
+                    playerMap.set(pid, { name, stammId, points });
+                    if (name.toLowerCase() === playerName.toLowerCase()) {
+                        myPid = pid;
+                        myTotalPoints = points;
+                        myStammId = stammId;
+                    }
+                }
+
+                if (!myPid) throw new Error(`Spieler "${playerName}" nicht gefunden.`);
+
+                // --- VILLAGE.TXT ---
+                const myVillages = [];
+                const playerVillages = new Map();
+
+                for (const line of villageLines) {
+                    const v = line.split(',');
+                    if (v.length < 7) continue;
+                    const vid = parseInt(v[0]);
+                    const name = decodeName(v[1]);
+                    const x = parseInt(v[2]);
+                    const y = parseInt(v[3]);
+                    const pid = parseInt(v[4]);
+                    const points = parseInt(v[5]) || 0;
+
+                    const vill = { vid, name, x, y, points };
+                    if (pid === myPid) myVillages.push(vill);
+                    if (!playerVillages.has(pid)) playerVillages.set(pid, []);
+                    playerVillages.get(pid).push(vill);
+                }
+
+                if (myVillages.length === 0) throw new Error('Keine Dörfer gefunden.');
+
+                setStatus(`✓ ${myVillages.length} Dorf(er) analysiert | Deine Punkte: ${myTotalPoints.toLocaleString()} | Stamm: ${stammMap.get(myStammId) || 'Kein Stamm'}`, 'success');
+
+                let html = '';
+                myVillages.forEach(myVill => {
+                    let candidates = [];
+
+                    for (const [pid, vills] of playerVillages) {
+                        if (pid === myPid) continue;
+                        const player = playerMap.get(pid);
+                        if (!player) continue;
+                        if (noIntern && player.stammId === myStammId) continue;
+                        if (noBundnis && bundnisIds.includes(player.stammId)) continue;
+
+                        let closest = null;
+                        let minDist = Infinity;
+                        const inRange = [];
+
+                        for (const v of vills) {
+                            const d = Math.max(Math.abs(myVill.x - v.x), Math.abs(myVill.y - v.y));
+                            if (d <= range) {
+                                inRange.push({ ...v, dist: d });
+                            }
+                            if (d < minDist) { minDist = d; closest = { ...v, dist: d }; }
+                        }
+
+                        if (!closest || minDist > range) continue;
+
+                        const attackInfo = isAttackable(myTotalPoints, player.points);
+
+                        candidates.push({
+                            pid, name: player.name, stammName: stammMap.get(player.stammId) || 'Kein Stamm', points: player.points,
+                            dist: minDist, villCount: inRange.length,
+                            allInRange: inRange.sort((a, b) => a.dist - b.dist), // Sortiert nach Distanz
+                            attackInfo
+                        });
+                    }
+
+                    // Filtern, wenn "Nur angreifbare" checked
+                    if (onlyAttackable) {
+                        candidates = candidates.filter(c => c.attackInfo.isAttack);
+                    }
+
+                    candidates.sort((a, b) => {
+                        if (sortBy === 'dist') return a.dist - b.dist;
+                        if (sortBy === 'dist-desc') return b.dist - a.dist;
+                        if (sortBy === 'points') return a.points - b.points;
+                        if (sortBy === 'points-desc') return b.points - a.points;
+                        if (sortBy === 'villcount') return a.villCount - b.villCount;
+                        return a.dist - b.dist;
+                    });
+
+                    const top = candidates.slice(0, topN);
+                    if (top.length === 0) return;
+
+                    html += `
+                        <table>
+                            <thead>
+                                <tr><th colspan="6"><strong>${myVill.name}</strong> (${myVill.x}|${myVill.y}) – ${myVill.points.toLocaleString()} Pkt</th></tr>
+                                <tr><th>#</th><th>Spieler (Stamm)</th><th>Entf.</th><th>Punkte</th><th>Angreifbar</th><th>Dörfer in Range</th></tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    top.forEach((c, i) => {
+                        const attackClass = c.attackInfo.isAttack ? 'attackable' : 'not-attackable';
+                        const attackText = c.attackInfo.isAttack ? '🟢 Ja' : `🔴 Nein (${c.attackInfo.diffPercent}%)`;
+                        html += `
+                            <tr>
+                                <td class="rank">#${i+1}</td>
+                                <td><strong>${c.name}</strong> <span class="stamm">(${c.stammName})</span></td>
+                                <td class="dist">${c.dist}</td>
+                                <td class="points">${c.points.toLocaleString()}</td>
+                                <td class="${attackClass}">${attackText}</td>
+                                <td class="villages">
+                                    ${c.villCount}
+                                    <div class="village-list">
+                                        ${c.allInRange.map(v => `
+                                            <div class="village-item">
+                                                ${v.x}|${v.y} (${v.points.toLocaleString()} Pkt)
+                                                <a href="https://dep20.die-staemme.de/game.php?screen=map&x=${v.x}&y=${v.y}&beacon" target="_blank" class="map-link">Map</a>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table>`;
+                });
+
+                resultsEl.innerHTML = html || '<p style="text-align:center; color:#aaa;">Keine Gegner in Reichweite.</p>';
+
+            } catch (err) {
+                setStatus('Fehler: ' + err.message, 'error');
+                console.error(err);
+            }
+        };
+
+        // Beim Laden: Cache prüfen
+        window.onload = async function() {
+            updateCacheInfo();
+            if (getCache(CACHE_VILLAGE) && getCache(CACHE_PLAYER)) {
+                setStatus('Daten aus Cache bereit!', 'success');
+            } else {
+                setStatus('Lade Daten via corsproxy.io...', 'loading');
+                await loadData();
+            }
+            // Bündnis-Checkboxen laden, falls ally.txt verfügbar
+            const allyText = getCache(CACHE_ALLY);
+            if (allyText) {
+                const stammMap = new Map();
+                const allyLines = parseLines(allyText);
+                for (const line of allyLines) {
+                    const a = line.split(',');
+                    if (a.length < 2) continue;
+                    const stammId = parseInt(a[0]);
+                    const name = decodeName(a[1]);
+                    stammMap.set(stammId, name);
+                }
+                loadBundnisCheckboxes(stammMap);
+            }
+        };
+    </script>
+</body>
+</html>
