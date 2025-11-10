@@ -1,0 +1,105 @@
+name: Update web/index.html
+
+on:
+  push:
+    paths:
+      - 'web/*.html'
+  workflow_dispatch:
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Generate index.html
+        run: |
+          python -c "
+          import requests, json, os
+          from bs4 import BeautifulSoup
+          from datetime import datetime
+
+          repo = 'heiko1988/ds'
+          path = 'web'
+          api_url = f'https://api.github.com/repos/{repo}/contents/{path}'
+
+          headers = {'Accept': 'application/vnd.github.v3+json'}
+          if os.getenv('GITHUB_TOKEN'):
+              headers['Authorization'] = f'token {os.getenv('GITHUB_TOKEN')}'
+
+          response = requests.get(api_url, headers=headers)
+          files = response.json()
+
+          html_files = [f for f in files if f['name'].endswith('.html') and f['name'] != 'index.html']
+          html_files.sort(key=lambda x: x['name'])
+
+          rows = []
+          for file in html_files:
+              name_encoded = file['name']
+              raw_url = file['download_url']
+              github_url = file['html_url']
+
+              try:
+                  content = requests.get(raw_url).text
+                  soup = BeautifulSoup(content, 'html.parser')
+                  title = soup.find('title')
+                  title_text = title.get_text().strip() if title else 'Kein Titel'
+
+                  desc_elem = soup.find(['h1', 'h2', 'p'])
+                  desc = desc_elem.get_text().strip()[:120] + '...' if desc_elem else 'Keine Beschreibung'
+
+                  rows.append(f'<tr><td><a href=\"{name_encoded}\">{name_encoded}</a></td><td>{title_text}</td><td>{desc}</td></tr>')
+              except:
+                  rows.append(f'<tr><td><a href=\"{name_encoded}\">{name_encoded}</a></td><td>Fehler</td><td>Laden fehlgeschlagen</td></tr>')
+
+          table = '<tr><th>Datei</th><th>Titel</th><th>Beschreibung</th></tr>\\n' + '\\n'.join(rows)
+          updated = datetime.now().strftime('%d.%m.%Y %H:%M')
+
+          index_html = '''<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>DS Web Tools</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #fafafa; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background: #0066cc; color: white; }
+    tr:nth-child(even) { background: #f2f2f2; }
+    tr:hover { background: #e6f3ff; }
+    a { color: #0066cc; font-weight: bold; }
+    small { color: #666; }
+  </style>
+</head>
+<body>
+  <h1>DS Web Tools</h1>
+  <p><em>Automatisch generierte Übersicht aller Tools im Ordner <code>web/</code>.</em></p>
+  <table>
+    ''' + table + '''
+  </table>
+  <p><small>Stand: ''' + updated + ''' Uhr | <a href="https://github.com/heiko1988/ds/actions">GitHub Actions Log</a></small></p>
+</body>
+</html>'''
+
+          with open('web/index.html', 'w', encoding='utf-8') as f:
+              f.write(index_html)
+          "
+
+      - name: Commit and Push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add web/index.html
+          git diff --quiet && git diff --staged --quiet || git commit -m "Auto-update index.html [skip ci'
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
