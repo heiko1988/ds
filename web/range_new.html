@@ -108,7 +108,93 @@
             gap: 0.5rem;
         }
 
-        input[type="text"],
+        /* Autocomplete Input mit Clear-Button */
+        .autocomplete-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        #playerName {
+            flex: 1;
+            padding: 0.9rem 1.2rem;
+            padding-right: 2.8rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(18, 18, 18, 0.8);
+            color: var(--text);
+            font-size: 1rem;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        #playerName:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 0.8rem;
+            background: none;
+            border: none;
+            color: var(--error);
+            font-size: 1.1rem;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: var(--transition);
+        }
+
+        .clear-btn.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .clear-btn:hover {
+            transform: scale(1.2);
+        }
+
+        /* Dropdown Vorschläge */
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            box-shadow: var(--shadow);
+        }
+
+        .autocomplete-suggestions.show {
+            display: block;
+        }
+
+        .suggestion-item {
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .suggestion-item:hover,
+        .suggestion-item.highlighted {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--accent);
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
         select {
             padding: 0.9rem 1.2rem;
             border: 1px solid var(--border);
@@ -120,7 +206,6 @@
             backdrop-filter: blur(5px);
         }
 
-        input[type="text"]:focus,
         select:focus {
             outline: none;
             border-color: var(--accent);
@@ -542,7 +627,11 @@
         <div class="controls">
             <div class="control-group">
                 <label for="playerName">Spielername</label>
-                <input type="text" id="playerName" placeholder="z.B. FSV+King">
+                <div class="autocomplete-wrapper">
+                    <input type="text" id="playerName" placeholder="z.B. FSV+King" autocomplete="off">
+                    <button type="button" class="clear-btn" id="clearPlayerName">×</button>
+                </div>
+                <div class="autocomplete-suggestions" id="suggestions"></div>
             </div>
 
             <div class="control-group">
@@ -626,14 +715,123 @@
         const CACHE_ALLY = 'staemme_ally_dep20';
         const CACHE_TIME = 'staemme_cache_time_dep20';
         const CACHE_BUNDNIS = 'staemme_bundnis_dep20';
+        const CACHE_PLAYER_HISTORY = 'staemme_player_history_dep20';
 
         const statusEl = document.getElementById('status');
         const cacheInfo = document.getElementById('cacheInfo');
         const resultsEl = document.getElementById('results');
+        const playerNameInput = document.getElementById('playerName');
+        const clearBtn = document.getElementById('clearPlayerName');
+        const suggestionsEl = document.getElementById('suggestions');
         const bundnisSearch = document.getElementById('bundnisSearch');
         const bundnisList = document.getElementById('bundnisList');
         const saveBundnis = document.getElementById('saveBundnis');
 
+        // === AUTOCOMPLETE LOGIK ===
+        let playerHistory = JSON.parse(localStorage.getItem(CACHE_PLAYER_HISTORY) || '[]');
+        let currentHighlight = -1;
+
+        function savePlayerHistory(name) {
+            if (!name.trim()) return;
+            playerHistory = playerHistory.filter(n => n.toLowerCase() !== name.toLowerCase());
+            playerHistory.unshift(name);
+            playerHistory = playerHistory.slice(0, 10); // Max 10 Einträge
+            localStorage.setItem(CACHE_PLAYER_HISTORY, JSON.stringify(playerHistory));
+        }
+
+        function showSuggestions(filter = '') {
+            suggestionsEl.innerHTML = '';
+            if (!filter) {
+                suggestionsEl.classList.remove('show');
+                return;
+            }
+
+            const matches = playerHistory
+                .filter(name => name.toLowerCase().includes(filter.toLowerCase()))
+                .slice(0, 8);
+
+            if (matches.length === 0) {
+                suggestionsEl.classList.remove('show');
+                return;
+            }
+
+            matches.forEach((name, idx) => {
+                const item = document.createElement('div');
+                item.className = 'suggestion-item';
+                item.textContent = name;
+                item.onclick = () => selectSuggestion(name);
+                suggestionsEl.appendChild(item);
+            });
+
+            currentHighlight = -1;
+            suggestionsEl.classList.add('show');
+        }
+
+        function selectSuggestion(name) {
+            playerNameInput.value = name;
+            suggestionsEl.classList.remove('show');
+            updateClearButton();
+        }
+
+        function updateClearButton() {
+            if (playerNameInput.value) {
+                clearBtn.classList.add('visible');
+            } else {
+                clearBtn.classList.remove('visible');
+            }
+        }
+
+        playerNameInput.addEventListener('input', () => {
+            const val = playerNameInput.value;
+            showSuggestions(val);
+            updateClearButton();
+        });
+
+        playerNameInput.addEventListener('focus', () => {
+            showSuggestions(playerNameInput.value);
+        });
+
+        playerNameInput.addEventListener('keydown', (e) => {
+            const items = suggestionsEl.querySelectorAll('.suggestion-item');
+            if (!items.length) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                currentHighlight = (currentHighlight + 1) % items.length;
+                highlightItem();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                currentHighlight = (currentHighlight - 1 + items.length) % items.length;
+                highlightItem();
+            } else if (e.key === 'Enter' && currentHighlight >= 0) {
+                e.preventDefault();
+                selectSuggestion(items[currentHighlight].textContent);
+            } else if (e.key === 'Escape') {
+                suggestionsEl.classList.remove('show');
+            }
+        });
+
+        function highlightItem() {
+            const items = suggestionsEl.querySelectorAll('.suggestion-item');
+            items.forEach((item, i) => {
+                item.classList.toggle('highlighted', i === currentHighlight);
+            });
+        }
+
+        clearBtn.addEventListener('click', () => {
+            playerNameInput.value = '';
+            updateClearButton();
+            suggestionsEl.classList.remove('show');
+            playerNameInput.focus();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!playerNameInput.contains(e.target) && !suggestionsEl.contains(e.target)) {
+                suggestionsEl.classList.remove('show');
+            }
+        });
+
+        // === RESTLICHE LOGIK (unverändert) ===
         function setStatus(msg, type = 'loading') {
             statusEl.innerHTML = `
                 <i class="fas ${type === 'loading' ? 'fa-circle-notch fa-spin' : type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
@@ -766,8 +964,10 @@
         });
 
         window.scan = async function() {
-            const playerName = document.getElementById('playerName').value.trim();
+            const playerName = playerNameInput.value.trim();
             if (!playerName) return alert('Spielernamen eingeben!');
+
+            savePlayerHistory(playerName); // Speichert beim Scannen
 
             const range = parseInt(document.getElementById('range').value);
             const topN = parseInt(document.getElementById('topN').value);
@@ -987,6 +1187,12 @@
                     stammMap.set(stammId, name);
                 }
                 loadBundnisCheckboxes(stammMap);
+            }
+
+            // Lade letzten Spielernamen
+            if (playerHistory.length > 0) {
+                playerNameInput.value = playerHistory[0];
+                updateClearButton();
             }
         };
     </script>
