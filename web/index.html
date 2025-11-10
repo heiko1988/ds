@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON NEXUS // TOOLS 2049</title>
+    <title>Tools-Übersicht im Web-Ordner</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -35,21 +35,6 @@
             100% { background-position: 50px 50px; }
         }
 
-        .scanline {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(to bottom, transparent, var(--neon-cyan), transparent);
-            animation: scan 4s linear infinite;
-            pointer-events: none;
-            z-index: 999;
-        }
-
-        @keyframes scan {
-            0% { transform: translateY(-100vh); }
-            100% { transform: translateY(100vh); }
-        }
-
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -64,7 +49,7 @@
             position: relative;
         }
 
-        .glitch {
+        .title {
             font-size: 3.5rem;
             font-weight: 900;
             text-transform: uppercase;
@@ -75,50 +60,7 @@
                 0 0 20px var(--neon-cyan),
                 0 0 40px var(--neon-cyan),
                 0 0 80px var(--neon-cyan);
-            animation: glitch 2s infinite;
             position: relative;
-        }
-
-        .glitch::before, .glitch::after {
-            content: 'NEON NEXUS // TOOLS 2049';
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%;
-            color: var(--neon-magenta);
-            clip-path: inset(0 0 0 0);
-            animation: glitch-skew 2s infinite;
-        }
-
-        .glitch::before {
-            left: 2px;
-            text-shadow: -2px 0 var(--neon-magenta);
-            animation: glitch-1 0.8s infinite linear alternate-reverse;
-        }
-
-        .glitch::after {
-            left: -2px;
-            text-shadow: 2px 0 var(--neon-blue);
-            animation: glitch-2 1.2s infinite linear alternate;
-        }
-
-        @keyframes glitch {
-            0%, 100% { text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px, 0 0 40px, 0 0 80px; }
-            50% { text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px, 0 0 20px; }
-        }
-
-        @keyframes glitch-1 {
-            0%, 100% { clip-path: inset(0 0 0 0); }
-            20% { clip-path: inset(90% 0 0 0); }
-            40% { clip-path: inset(0 0 80% 0); }
-            60% { clip-path: inset(70% 0 0 0); }
-            80% { clip-path: inset(0 0 90% 0); }
-        }
-
-        @keyframes glitch-2 {
-            0%, 100% { clip-path: inset(0 0 0 0); }
-            25% { clip-path: inset(0 0 60% 0); }
-            50% { clip-path: inset(80% 0 0 0); }
-            75% { clip-path: inset(0 0 90% 0); }
         }
 
         .subtitle {
@@ -206,7 +148,7 @@
         }
 
         a::after {
-            content: ' ▸';
+            content: ' >';
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -255,19 +197,18 @@
         }
 
         @media (max-width: 768px) {
-            .glitch { font-size: 2rem; }
+            .title { font-size: 2rem; }
             table { font-size: 0.8rem; }
             th, td { padding: 0.5rem; }
         }
     </style>
 </head>
 <body>
-    <div class="scanline"></div>
     <div class="hologram"></div>
 
     <div class="container">
         <header>
-            <div class="glitch">NEON NEXUS // TOOLS 2049</div>
+            <div class="title">Tools-Übersicht</div>
             <div class="subtitle">Datenfluss aktiviert – Systemscan läuft...</div>
             <div class="timestamp">Stand: <span id="timestamp"></span></div>
         </header>
@@ -306,7 +247,7 @@
 
                 const notification = document.getElementById('notification');
                 if (newFiles.length > 0) {
-                    notification.innerHTML = `⚡ NEUE MODULE ENTDECKT: <strong>${newFiles.join('</strong> | <strong>')}</strong> ⚡`;
+                    notification.innerHTML = `NEUE MODULE ENTDECKT: <strong>${newFiles.join('</strong> | <strong>')}</strong>`;
                     notification.style.display = 'block';
                 }
 
@@ -364,7 +305,7 @@
                 document.getElementById('timestamp').textContent = new Date().toLocaleString('de-DE');
             } catch (error) {
                 console.error('SYSTEMFEHLER:', error);
-                document.querySelector('#tools-table tbody').innerHTML = '<tr><td colspan="4" style="color:#ff00ff; text-align:center;">⚠️ VERBINDUNG ZUM NEXUS UNTERBROCHEN ⚠️</td></tr>';
+                document.querySelector('#tools-table tbody').innerHTML = '<tr><td colspan="4" style="color:#ff00ff; text-align:center;">VERBINDUNG ZUM NEXUS UNTERBROCHEN</td></tr>';
             }
         }
 
