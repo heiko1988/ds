@@ -88,7 +88,7 @@
             backdrop-filter: blur(10px);
             box-shadow: var(--shadow);
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(4, 1fr) repeat(3, max-content) 1fr auto auto;
             gap: 1.2rem;
             align-items: center;
         }
@@ -128,11 +128,46 @@
             transform: translateY(-2px);
         }
 
-        input[type="checkbox"] {
-            width: 1.2rem;
-            height: 1.2rem;
-            accent-color: var(--accent);
+        /* Modern Checkboxes */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
             cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            appearance: none;
+            width: 1.4rem;
+            height: 1.4rem;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            background: transparent;
+            position: relative;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+            box-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .checkbox-wrapper input[type="checkbox"]:hover {
+            border-color: var(--accent);
+            box-shadow: var(--accent-glow);
         }
 
         .btn {
@@ -189,7 +224,6 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            grid-column: 1 / -1;
         }
 
         .status.loading {
@@ -442,6 +476,26 @@
             font-size: 1.1rem;
         }
 
+        @media (max-width: 1400px) {
+            .controls {
+                grid-template-columns: repeat(3, 1fr) repeat(3, max-content) 1fr auto auto;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .controls {
+                grid-template-columns: repeat(2, 1fr) repeat(3, max-content) 1fr auto auto;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .controls {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto auto;
+            }
+            .status { grid-column: 1 / -1; }
+        }
+
         @media (max-width: 768px) {
             .controls {
                 grid-template-columns: 1fr;
@@ -487,12 +541,12 @@
 
         <div class="controls">
             <div class="control-group">
-                <label for="playerName"><i class="fas fa-user"></i> Spielername</label>
+                <label for="playerName">Spielername</label>
                 <input type="text" id="playerName" placeholder="z.B. FSV+King">
             </div>
 
             <div class="control-group">
-                <label for="range"><i class="fas fa-expand-arrows-alt"></i> Reichweite</label>
+                <label for="range">Reichweite</label>
                 <select id="range">
                     <option value="10">±10 Felder</option>
                     <option value="20" selected>±20 Felder</option>
@@ -502,7 +556,7 @@
             </div>
 
             <div class="control-group">
-                <label for="topN"><i class="fas fa-trophy"></i> Top pro Dorf</label>
+                <label for="topN">Top pro Dorf</label>
                 <select id="topN">
                     <option value="5">Top 5</option>
                     <option value="10" selected>Top 10</option>
@@ -511,7 +565,7 @@
             </div>
 
             <div class="control-group">
-                <label for="sort"><i class="fas fa-sort"></i> Sortieren</label>
+                <label for="sort">Sortieren</label>
                 <select id="sort">
                     <option value="dist">Entfernung (Spieler) aufsteigend</option>
                     <option value="dist-desc">Entfernung (Spieler) absteigend</option>
@@ -522,29 +576,38 @@
             </div>
 
             <div class="control-group">
-                <label for="onlyAttackable"><input type="checkbox" id="onlyAttackable"> Nur angreifbare</label>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="onlyAttackable">
+                    <label for="onlyAttackable">Nur angreifbare</label>
+                </div>
             </div>
 
             <div class="control-group">
-                <label for="noIntern"><input type="checkbox" id="noIntern"> Keine Stammesinternen</label>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="noIntern">
+                    <label for="noIntern">Keine Stammesinternen</label>
+                </div>
             </div>
 
             <div class="control-group">
-                <label for="noBundnis"><input type="checkbox" id="noBundnis"> Keine Bündnis/NAP</label>
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="noBundnis">
+                    <label for="noBundnis">Keine Bündnis/NAP</label>
+                </div>
             </div>
 
             <div class="bundnis-container">
                 <div class="control-group bundnis-search">
-                    <label for="bundnisSearch"><i class="fas fa-search"></i> Stamm suchen...</label>
+                    <label for="bundnisSearch">Stamm suchen...</label>
                     <input type="text" id="bundnisSearch" placeholder="Filter...">
                 </div>
                 <div class="bundnis-list" id="bundnisList"></div>
-                <button id="saveBundnis" class="btn btn-secondary"><i class="fas fa-save"></i> Speichern</button>
+                <button id="saveBundnis" class="btn btn-secondary">Speichern</button>
             </div>
 
-            <button onclick="scan()" class="btn btn-primary"><i class="fas fa-search"></i> SCANNEN</button>
-            <button id="reloadBtn" onclick="forceReload()" class="btn btn-danger"><i class="fas fa-sync-alt"></i> DATEN NEU LADEN</button>
-            <div class="status loading" id="status"><i class="fas fa-circle-notch fa-spin"></i> Lade Cache...</div>
+            <button onclick="scan()" class="btn btn-primary">SCANNEN</button>
+            <button id="reloadBtn" onclick="forceReload()" class="btn btn-danger">DATEN NEU LADEN</button>
+            <div class="status loading" id="status">Lade Cache...</div>
         </div>
 
         <div class="cache" id="cacheInfo"></div>
@@ -679,8 +742,10 @@
                 const div = document.createElement('div');
                 div.className = 'bundnis-item';
                 div.innerHTML = `
-                    <input type="checkbox" id="bundnis_${id}" value="${id}" ${selectedBundnis.includes(id) ? 'checked' : ''}>
-                    <label for="bundnis_${id}">${name}</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="bundnis_${id}" value="${id}" ${selectedBundnis.includes(id) ? 'checked' : ''}>
+                        <label for="bundnis_${id}">${name}</label>
+                    </div>
                 `;
                 bundnisList.appendChild(div);
             });
@@ -893,7 +958,7 @@
                     html += `</tbody></table></div>`;
                 });
 
-                resultsEl.innerHTML = html || '<div class="no-results"><i class="fas fa-search"></i> Keine Gegner in Reichweite.</div>';
+                resultsEl.innerHTML = html || '<div class="no-results">Keine Gegner in Reichweite.</div>';
 
             } catch (err) {
                 setStatus('Fehler: ' + err.message, 'error');
