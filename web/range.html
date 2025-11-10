@@ -56,7 +56,12 @@
             background: #1a1a1a; border-radius: 6px; padding: 8px; margin-top: 5px;
             max-height: 200px; overflow-y: auto; font-size: 0.85em; line-height: 1.4;
         }
-        .village-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; gap: 10px; }
+        .village-item { 
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; gap: 10px;
+            font-size: 0.9em;
+        }
+        .village-name { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .village-dist { color: #ffaa00; font-weight: bold; min-width: 50px; text-align: right; }
         .stamm { color: #cccccc; font-style: italic; }
         .bundnis-container { display: flex; flex-direction: column; align-items: start; gap: 10px; }
         .bundnis-list { background: #333; border: 1px solid #555; border-radius: 6px; padding: 10px; max-height: 200px; overflow-y: auto; }
@@ -86,11 +91,11 @@
                 <option value="20">Top 20 pro Dorf</option>
             </select>
             <select id="sort">
-                <option value="dist">Entfernung ↑</option>
-                <option value="dist-desc">Entfernung ↓</option>
-                <option value="points-desc">Punkte ↓</option>
-                <option value="points">Punkte ↑</option>
-                <option value="villcount">Dörfer in Range ↑</option>
+                <option value="dist">Entfernung (Spieler) ascending</option>
+                <option value="dist-desc">Entfernung (Spieler) descending</option>
+                <option value="points-desc">Punkte descending</option>
+                <option value="points">Punkte ascending</option>
+                <option value="villcount">Dörfer in Range ascending</option>
             </select>
             <label for="onlyAttackable"><input type="checkbox" id="onlyAttackable"> Nur angreifbare</label>
             <label for="noIntern"><input type="checkbox" id="noIntern"> Keine Stammesinternen</label>
@@ -100,7 +105,7 @@
                 <div class="bundnis-list" id="bundnisList"></div>
                 <button id="saveBundnis">Speichern</button>
             </div>
-            <button onclick="scan()">🔍 SCANNEN</button>
+            <button onclick="scan()">SCANNEN</button>
             <button id="reloadBtn" onclick="forceReload()">DATEN NEU LADEN</button>
             <div class="status" id="status">Lade Cache...</div>
         </div>
@@ -166,9 +171,7 @@
                 return cached;
             }
 
-            // Cache-Buster in ORIGINALE URL
             const timedUrl = origUrl + '?t=' + Date.now();
-            // Nun proxy
             const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(timedUrl);
 
             setStatus('Lade live via corsproxy.io...');
@@ -220,7 +223,6 @@
             catch { return name; }
         }
 
-        // Funktion für Angreifbar-Check (±20%)
         function isAttackable(myPoints, oppPoints) {
             const minPoints = Math.min(myPoints, oppPoints);
             const maxPoints = Math.max(myPoints, oppPoints);
@@ -229,7 +231,6 @@
             return { isAttack, diffPercent: diffPercent.toFixed(1) };
         }
 
-        // Bündnis-Stämme laden und Checkboxen füllen
         async function loadBundnisCheckboxes(stammMap) {
             bundnisList.innerHTML = '';
             const selectedBundnis = JSON.parse(localStorage.getItem(CACHE_BUNDNIS) || '[]');
@@ -246,7 +247,6 @@
             });
         }
 
-        // Suchfunktion für Bündnis-Checkboxen
         bundnisSearch.addEventListener('input', () => {
             const filter = bundnisSearch.value.toLowerCase();
             Array.from(bundnisList.children).forEach(item => {
@@ -255,7 +255,6 @@
             });
         });
 
-        // Speichern der Bündnis-Auswahl
         saveBundnis.addEventListener('click', () => {
             const selected = Array.from(bundnisList.querySelectorAll('input:checked')).map(input => parseInt(input.value));
             localStorage.setItem(CACHE_BUNDNIS, JSON.stringify(selected));
@@ -290,7 +289,6 @@
                     throw new Error('Dateien leer – Welt ist zu neu oder noch keine Daten.');
                 }
 
-                // --- ALLY.TXT: Stamm-ID → Name Map ---
                 const stammMap = new Map();
                 for (const line of allyLines) {
                     const a = line.split(',');
@@ -300,13 +298,10 @@
                     stammMap.set(stammId, name);
                 }
 
-                // Bündnis-Checkboxen füllen
                 await loadBundnisCheckboxes(stammMap);
 
-                // Bündnis-Stämme laden
                 const bundnisIds = JSON.parse(localStorage.getItem(CACHE_BUNDNIS) || '[]');
 
-                // --- PLAYER.TXT: PID, Gesamtpunkte & Stamm-ID finden ---
                 let myPid = null;
                 let myTotalPoints = 0;
                 let myStammId = 0;
@@ -329,7 +324,6 @@
 
                 if (!myPid) throw new Error(`Spieler "${playerName}" nicht gefunden.`);
 
-                // --- VILLAGE.TXT ---
                 const myVillages = [];
                 const playerVillages = new Map();
 
@@ -380,15 +374,17 @@
 
                         const attackInfo = isAttackable(myTotalPoints, player.points);
 
+                        // Sortiere Dörfer in Range nach Entfernung (kürzester zuerst)
+                        inRange.sort((a, b) => a.dist - b.dist);
+
                         candidates.push({
                             pid, name: player.name, stammName: stammMap.get(player.stammId) || 'Kein Stamm', points: player.points,
                             dist: minDist, villCount: inRange.length,
-                            allInRange: inRange.sort((a, b) => a.dist - b.dist), // Sortiert nach Distanz
+                            allInRange: inRange,
                             attackInfo
                         });
                     }
 
-                    // Filtern, wenn "Nur angreifbare" checked
                     if (onlyAttackable) {
                         candidates = candidates.filter(c => c.attackInfo.isAttack);
                     }
@@ -409,14 +405,14 @@
                         <table>
                             <thead>
                                 <tr><th colspan="6"><strong>${myVill.name}</strong> (${myVill.x}|${myVill.y}) – ${myVill.points.toLocaleString()} Pkt</th></tr>
-                                <tr><th>#</th><th>Spieler (Stamm)</th><th>Entf.</th><th>Punkte</th><th>Angreifbar</th><th>Dörfer in Range</th></tr>
+                                <tr><th>#</th><th>Spieler (Stamm)</th><th>Entf. (Spieler)</th><th>Punkte</th><th>Angreifbar</th><th>Dörfer in ±${range} Felder</th></tr>
                             </thead>
                             <tbody>
                     `;
 
                     top.forEach((c, i) => {
                         const attackClass = c.attackInfo.isAttack ? 'attackable' : 'not-attackable';
-                        const attackText = c.attackInfo.isAttack ? '🟢 Ja' : `🔴 Nein (${c.attackInfo.diffPercent}%)`;
+                        const attackText = c.attackInfo.isAttack ? 'Ja' : `Nein (${c.attackInfo.diffPercent}%)`;
                         html += `
                             <tr>
                                 <td class="rank">#${i+1}</td>
@@ -429,8 +425,9 @@
                                     <div class="village-list">
                                         ${c.allInRange.map(v => `
                                             <div class="village-item">
-                                                ${v.x}|${v.y} (${v.points.toLocaleString()} Pkt)
-                                                <a href="https://dep20.die-staemme.de/game.php?screen=map&x=${v.x}&y=${v.y}&beacon" target="_blank" class="map-link">Map</a>
+                                                <span class="village-name" title="${v.name}">${v.name}</span>
+                                                <span class="village-dist">${v.dist} Felder</span>
+                                                <a href="https://dep20.die-staemme.de/game.php?screen=map&x=${v.x}&y=${v.y}" target="_blank" class="map-link">Map</a>
                                             </div>
                                         `).join('')}
                                     </div>
@@ -450,7 +447,6 @@
             }
         };
 
-        // Beim Laden: Cache prüfen
         window.onload = async function() {
             updateCacheInfo();
             if (getCache(CACHE_VILLAGE) && getCache(CACHE_PLAYER)) {
@@ -459,7 +455,7 @@
                 setStatus('Lade Daten via corsproxy.io...', 'loading');
                 await loadData();
             }
-            // Bündnis-Checkboxen laden, falls ally.txt verfügbar
+
             const allyText = getCache(CACHE_ALLY);
             if (allyText) {
                 const stammMap = new Map();
