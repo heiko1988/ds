@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stämme Nexus Scanner | dep20</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --card: #121212;
+            --accent: #00ff88;
+            --accent-glow: 0 0 15px rgba(0, 255, 136, 0.4);
+            --text: #e0e0e0;
+            --text-muted: #aaaaaa;
+            --border: #2a2a2a;
+            --hover: #1a1a1a;
+            --success: #00ff88;
+            --error: #ff3366;
+            --warning: #ffcc00;
+            --radius: 16px;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 136, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 100, 255, 0.1) 0%, transparent 50%);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            letter-spacing: 2px;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            border-radius: 2px;
+        }
+
+        .controls {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.8rem;
+            margin-bottom: 1.5rem;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.2rem;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        input[type="text"],
+        select {
+            padding: 0.9rem 1.2rem;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: rgba(18, 18, 18, 0.8);
+            color: var(--text);
+            font-size: 1rem;
+            transition: var(--transition);
+            backdrop-filter: blur(5px);
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: var(--accent-glow);
+            transform: translateY(-2px);
+        }
+
+        input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            accent-color: var(--accent);
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 0.9rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            color: #000;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff3366, #ff6b9d);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 51, 102, 0.5);
+        }
+
+        .btn-secondary {
+            background: #2a2a2a;
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--hover);
+            border-color: var(--accent);
+        }
+
+        .status {
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            grid-column: 1 / -1;
+        }
+
+        .status.loading {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+        }
+
+        .status.success {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(0, 255, 136, 0.4);
+        }
+
+        .status.error {
+            background: rgba(255, 51, 102, 0.15);
+            color: var(--error);
+            border: 1px solid rgba(255, 51, 102, 0.4);
+        }
+
+        .cache {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 1rem 0;
+        }
+
+        .bundnis-container {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .bundnis-search {
+            grid-column: 1 / -1;
+        }
+
+        .bundnis-list {
+            background: rgba(18, 18, 18, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            max-height: 250px;
+            overflow-y: auto;
+            backdrop-filter: blur(5px);
+        }
+
+        .bundnis-item {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .bundnis-item:last-child {
+            border-bottom: none;
+        }
+
+        .bundnis-item label {
+            flex: 1;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .bundnis-item input:checked + label {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        #results {
+            margin-top: 2rem;
+        }
+
+        .village-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .village-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .village-header {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 212, 255, 0.1));
+            padding: 1.2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .village-name {
+            font-size: 1.3rem;
+            color: var(--accent);
+        }
+
+        .village-coords {
+            font-family: 'Orbitron', monospace;
+            color: #00d4ff;
+        }
+
+        .village-points {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        thead th {
+            background: rgba(18, 18, 18, 0.8);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        tbody tr {
+            transition: var(--transition);
+        }
+
+        tbody tr:hover {
+            background: var(--hover);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .rank {
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'Orbitron', monospace;
+        }
+
+        .player-name {
+            font-weight: 600;
+        }
+
+        .stamm {
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .dist {
+            color: #ffcc00;
+            font-weight: 600;
+        }
+
+        .points {
+            color: #4dff4d;
+        }
+
+        .attackable {
+            color: var(--success);
+            font-weight: 600;
+        }
+
+        .not-attackable {
+            color: var(--error);
+            font-weight: 600;
+        }
+
+        .villages-count {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .village-list {
+            margin-top: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 0.5rem;
+            background: rgba(10, 10, 10, 0.5);
+            border-radius: 8px;
+        }
+
+        .village-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin-bottom: 0.3rem;
+            background: rgba(255, 255, 255, 0.03);
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .village-item:hover {
+            background: rgba(0, 255, 136, 0.1);
+            transform: translateX(4px);
+        }
+
+        .village-name {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .village-dist {
+            color: #ffcc00;
+            font-weight: 600;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .map-link {
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            color: #000;
+            padding: 0.4rem 0.8rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.8rem;
+            transition: var(--transition);
+        }
+
+        .map-link:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+            }
+            .bundnis-container {
+                grid-template-columns: 1fr;
+            }
+            h1 {
+                font-size: 2.5rem;
+            }
+            .village-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--card);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00cc70;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Nexus Scanner</h1>
+        </header>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="playerName"><i class="fas fa-user"></i> Spielername</label>
+                <input type="text" id="playerName" placeholder="z.B. FSV+King">
+            </div>
+
+            <div class="control-group">
+                <label for="range"><i class="fas fa-expand-arrows-alt"></i> Reichweite</label>
+                <select id="range">
+                    <option value="10">±10 Felder</option>
+                    <option value="20" selected>±20 Felder</option>
+                    <option value="30">±30 Felder</option>
+                    <option value="50">±50 Felder</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="topN"><i class="fas fa-trophy"></i> Top pro Dorf</label>
+                <select id="topN">
+                    <option value="5">Top 5</option>
+                    <option value="10" selected>Top 10</option>
+                    <option value="20">Top 20</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="sort"><i class="fas fa-sort"></i> Sortieren</label>
+                <select id="sort">
+                    <option value="dist">Entfernung (Spieler) aufsteigend</option>
+                    <option value="dist-desc">Entfernung (Spieler) absteigend</option>
+                    <option value="points-desc">Punkte absteigend</option>
+                    <option value="points">Punkte aufsteigend</option>
+                    <option value="villcount">Dörfer in Range aufsteigend</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="onlyAttackable"><input type="checkbox" id="onlyAttackable"> Nur angreifbare</label>
+            </div>
+
+            <div class="control-group">
+                <label for="noIntern"><input type="checkbox" id="noIntern"> Keine Stammesinternen</label>
+            </div>
+
+            <div class="control-group">
+                <label for="noBundnis"><input type="checkbox" id="noBundnis"> Keine Bündnis/NAP</label>
+            </div>
+
+            <div class="bundnis-container">
+                <div class="control-group bundnis-search">
+                    <label for="bundnisSearch"><i class="fas fa-search"></i> Stamm suchen...</label>
+                    <input type="text" id="bundnisSearch" placeholder="Filter...">
+                </div>
+                <div class="bundnis-list" id="bundnisList"></div>
+                <button id="saveBundnis" class="btn btn-secondary"><i class="fas fa-save"></i> Speichern</button>
+            </div>
+
+            <button onclick="scan()" class="btn btn-primary"><i class="fas fa-search"></i> SCANNEN</button>
+            <button id="reloadBtn" onclick="forceReload()" class="btn btn-danger"><i class="fas fa-sync-alt"></i> DATEN NEU LADEN</button>
+            <div class="status loading" id="status"><i class="fas fa-circle-notch fa-spin"></i> Lade Cache...</div>
+        </div>
+
+        <div class="cache" id="cacheInfo"></div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        // === CONFIG & CACHING ===
+        const VILLAGE_ORIG = 'https://dep20.die-staemme.de/map/village.txt';
+        const PLAYER_ORIG = 'https://dep20.die-staemme.de/map/player.txt';
+        const ALLY_ORIG = 'https://dep20.die-staemme.de/map/ally.txt';
+
+        const CACHE_VILLAGE = 'staemme_village_dep20';
+        const CACHE_PLAYER = 'staemme_player_dep20';
+        const CACHE_ALLY = 'staemme_ally_dep20';
+        const CACHE_TIME = 'staemme_cache_time_dep20';
+        const CACHE_BUNDNIS = 'staemme_bundnis_dep20';
+
+        const statusEl = document.getElementById('status');
+        const cacheInfo = document.getElementById('cacheInfo');
+        const resultsEl = document.getElementById('results');
+        const bundnisSearch = document.getElementById('bundnisSearch');
+        const bundnisList = document.getElementById('bundnisList');
+        const saveBundnis = document.getElementById('saveBundnis');
+
+        function setStatus(msg, type = 'loading') {
+            statusEl.innerHTML = `
+                <i class="fas ${type === 'loading' ? 'fa-circle-notch fa-spin' : type === 'success' ? 'fa-check-circle' : 'fa-exclamation-triangle'}"></i>
+                ${msg}
+            `;
+            statusEl.className = `status ${type}`;
+        }
+
+        function updateCacheInfo() {
+            const time = localStorage.getItem(CACHE_TIME);
+            if (time) {
+                const date = new Date(parseInt(time));
+                cacheInfo.textContent = `Daten vom: ${date.toLocaleString()} | "DATEN NEU LADEN" zum Aktualisieren`;
+            } else {
+                cacheInfo.textContent = 'Kein Cache – lade Daten...';
+            }
+        }
+
+        function saveCache(key, data) {
+            try {
+                localStorage.setItem(key, data);
+                localStorage.setItem(CACHE_TIME, Date.now().toString());
+                updateCacheInfo();
+            } catch (e) {
+                console.warn("Cache voll", e);
+            }
+        }
+
+        function getCache(key) {
+            return localStorage.getItem(key);
+        }
+
+        async function fetchWithCache(origUrl, cacheKey) {
+            const cached = getCache(cacheKey);
+            if (cached) {
+                setStatus('Daten aus Cache...', 'success');
+                return cached;
+            }
+
+            const timedUrl = origUrl + '?t=' + Date.now();
+            const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(timedUrl);
+
+            setStatus('Lade live via corsproxy.io...', 'loading');
+            try {
+                const res = await fetch(proxyUrl);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const text = await res.text();
+                saveCache(cacheKey, text);
+                setStatus('Live-Daten geladen & gecacht!', 'success');
+                return text;
+            } catch (err) {
+                throw new Error(`Netzwerk: ${err.message}`);
+            }
+        }
+
+        window.forceReload = async function() {
+            localStorage.removeItem(CACHE_VILLAGE);
+            localStorage.removeItem(CACHE_PLAYER);
+            localStorage.removeItem(CACHE_ALLY);
+            localStorage.removeItem(CACHE_TIME);
+            setStatus('Cache gelöscht – lade neu...', 'loading');
+            updateCacheInfo();
+            await loadData();
+        };
+
+        async function loadData() {
+            try {
+                const [villageText, playerText, allyText] = await Promise.all([
+                    fetchWithCache(VILLAGE_ORIG, CACHE_VILLAGE),
+                    fetchWithCache(PLAYER_ORIG, CACHE_PLAYER),
+                    fetchWithCache(ALLY_ORIG, CACHE_ALLY)
+                ]);
+                return { villageText, playerText, allyText };
+            } catch (err) {
+                setStatus('Fehler: ' + err.message, 'error');
+                console.error(err);
+                return null;
+            }
+        }
+
+        function parseLines(text) {
+            return text.trim().split('\n')
+                .map(l => l.trim())
+                .filter(l => l && l !== '---' && !l.startsWith('#'));
+        }
+
+        function decodeName(name) {
+            try { return decodeURIComponent(name.replace(/\+/g, ' ')); }
+            catch { return name; }
+        }
+
+        function isAttackable(myPoints, oppPoints) {
+            const minPoints = Math.min(myPoints, oppPoints);
+            const maxPoints = Math.max(myPoints, oppPoints);
+            const diffPercent = ((maxPoints - minPoints) / minPoints) * 100;
+            const isAttack = maxPoints <= minPoints * 1.2;
+            return { isAttack, diffPercent: diffPercent.toFixed(1) };
+        }
+
+        async function loadBundnisCheckboxes(stammMap) {
+            bundnisList.innerHTML = '';
+            const selectedBundnis = JSON.parse(localStorage.getItem(CACHE_BUNDNIS) || '[]');
+
+            const sortedStamme = Array.from(stammMap.entries()).sort((a, b) => a[1].localeCompare(b[1]));
+            sortedStamme.forEach(([id, name]) => {
+                const div = document.createElement('div');
+                div.className = 'bundnis-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="bundnis_${id}" value="${id}" ${selectedBundnis.includes(id) ? 'checked' : ''}>
+                    <label for="bundnis_${id}">${name}</label>
+                `;
+                bundnisList.appendChild(div);
+            });
+        }
+
+        bundnisSearch.addEventListener('input', () => {
+            const filter = bundnisSearch.value.toLowerCase();
+            Array.from(bundnisList.children).forEach(item => {
+                const label = item.querySelector('label').textContent.toLowerCase();
+                item.style.display = label.includes(filter) ? 'flex' : 'none';
+            });
+        });
+
+        saveBundnis.addEventListener('click', () => {
+            const selected = Array.from(bundnisList.querySelectorAll('input:checked')).map(input => parseInt(input.value));
+            localStorage.setItem(CACHE_BUNDNIS, JSON.stringify(selected));
+            setStatus('Bündnis-Stämme gespeichert!', 'success');
+        });
+
+        window.scan = async function() {
+            const playerName = document.getElementById('playerName').value.trim();
+            if (!playerName) return alert('Spielernamen eingeben!');
+
+            const range = parseInt(document.getElementById('range').value);
+            const topN = parseInt(document.getElementById('topN').value);
+            const sortBy = document.getElementById('sort').value;
+            const onlyAttackable = document.getElementById('onlyAttackable').checked;
+            const noIntern = document.getElementById('noIntern').checked;
+            const noBundnis = document.getElementById('noBundnis').checked;
+
+            setStatus('Analysiere Welt...', 'loading');
+            resultsEl.innerHTML = '';
+
+            const data = await loadData();
+            if (!data) return;
+
+            try {
+                const { villageText, playerText, allyText } = data;
+
+                const villageLines = parseLines(villageText);
+                const playerLines = parseLines(playerText);
+                const allyLines = parseLines(allyText);
+
+                if (villageLines.length === 0 || playerLines.length === 0) {
+                    throw new Error('Dateien leer – Welt ist zu neu oder noch keine Daten.');
+                }
+
+                const stammMap = new Map();
+                for (const line of allyLines) {
+                    const a = line.split(',');
+                    if (a.length < 2) continue;
+                    const stammId = parseInt(a[0]);
+                    const name = decodeName(a[1]);
+                    stammMap.set(stammId, name);
+                }
+
+                await loadBundnisCheckboxes(stammMap);
+
+                const bundnisIds = JSON.parse(localStorage.getItem(CACHE_BUNDNIS) || '[]');
+
+                let myPid = null;
+                let myTotalPoints = 0;
+                let myStammId = 0;
+                const playerMap = new Map();
+
+                for (const line of playerLines) {
+                    const p = line.split(',');
+                    if (p.length < 6) continue;
+                    const pid = parseInt(p[0]);
+                    const name = decodeName(p[1]);
+                    const stammId = parseInt(p[2]) || 0;
+                    const points = parseInt(p[4]) || 0;
+                    playerMap.set(pid, { name, stammId, points });
+                    if (name.toLowerCase() === playerName.toLowerCase()) {
+                        myPid = pid;
+                        myTotalPoints = points;
+                        myStammId = stammId;
+                    }
+                }
+
+                if (!myPid) throw new Error(`Spieler "${playerName}" nicht gefunden.`);
+
+                const myVillages = [];
+                const playerVillages = new Map();
+
+                for (const line of villageLines) {
+                    const v = line.split(',');
+                    if (v.length < 7) continue;
+                    const vid = parseInt(v[0]);
+                    const name = decodeName(v[1]);
+                    const x = parseInt(v[2]);
+                    const y = parseInt(v[3]);
+                    const pid = parseInt(v[4]);
+                    const points = parseInt(v[5]) || 0;
+
+                    const vill = { vid, name, x, y, points };
+                    if (pid === myPid) myVillages.push(vill);
+                    if (!playerVillages.has(pid)) playerVillages.set(pid, []);
+                    playerVillages.get(pid).push(vill);
+                }
+
+                if (myVillages.length === 0) throw new Error('Keine Dörfer gefunden.');
+
+                setStatus(`Analyse abgeschlossen | ${myVillages.length} Dorf(er) | ${myTotalPoints.toLocaleString()} Pkt | Stamm: ${stammMap.get(myStammId) || 'Kein Stamm'}`, 'success');
+
+                let html = '';
+                myVillages.forEach(myVill => {
+                    let candidates = [];
+
+                    for (const [pid, vills] of playerVillages) {
+                        if (pid === myPid) continue;
+                        const player = playerMap.get(pid);
+                        if (!player) continue;
+                        if (noIntern && player.stammId === myStammId) continue;
+                        if (noBundnis && bundnisIds.includes(player.stammId)) continue;
+
+                        let closest = null;
+                        let minDist = Infinity;
+                        const inRange = [];
+
+                        for (const v of vills) {
+                            const d = Math.max(Math.abs(myVill.x - v.x), Math.abs(myVill.y - v.y));
+                            if (d <= range) {
+                                inRange.push({ ...v, dist: d });
+                            }
+                            if (d < minDist) { minDist = d; closest = { ...v, dist: d }; }
+                        }
+
+                        if (!closest || minDist > range) continue;
+
+                        const attackInfo = isAttackable(myTotalPoints, player.points);
+                        inRange.sort((a, b) => a.dist - b.dist);
+
+                        candidates.push({
+                            pid, name: player.name, stammName: stammMap.get(player.stammId) || 'Kein Stamm', points: player.points,
+                            dist: minDist, villCount: inRange.length,
+                            allInRange: inRange,
+                            attackInfo
+                        });
+                    }
+
+                    if (onlyAttackable) {
+                        candidates = candidates.filter(c => c.attackInfo.isAttack);
+                    }
+
+                    candidates.sort((a, b) => {
+                        if (sortBy === 'dist') return a.dist - b.dist;
+                        if (sortBy === 'dist-desc') return b.dist - a.dist;
+                        if (sortBy === 'points') return a.points - b.points;
+                        if (sortBy === 'points-desc') return b.points - a.points;
+                        if (sortBy === 'villcount') return a.villCount - b.villCount;
+                        return a.dist - b.dist;
+                    });
+
+                    const top = candidates.slice(0, topN);
+                    if (top.length === 0) return;
+
+                    html += `
+                        <div class="village-card">
+                            <div class="village-header">
+                                <div>
+                                    <div class="village-name">${myVill.name}</div>
+                                    <div class="village-coords">${myVill.x}|${myVill.y}</div>
+                                </div>
+                                <div class="village-points">${myVill.points.toLocaleString()} Pkt</div>
+                            </div>
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Spieler (Stamm)</th>
+                                        <th>Entf.</th>
+                                        <th>Punkte</th>
+                                        <th>Angreifbar</th>
+                                        <th>Dörfer in ±${range}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    top.forEach((c, i) => {
+                        const attackClass = c.attackInfo.isAttack ? 'attackable' : 'not-attackable';
+                        const attackText = c.attackInfo.isAttack ? 'Ja' : `Nein (${c.attackInfo.diffPercent}%)`;
+                        html += `
+                            <tr>
+                                <td class="rank">#${i+1}</td>
+                                <td>
+                                    <div class="player-name">${c.name}</div>
+                                    <div class="stamm">(${c.stammName})</div>
+                                </td>
+                                <td class="dist">${c.dist}</td>
+                                <td class="points">${c.points.toLocaleString()}</td>
+                                <td class="${attackClass}">${attackText}</td>
+                                <td>
+                                    <div class="villages-count">${c.villCount} Dorf${c.villCount !== 1 ? 'er' : ''}</div>
+                                    <div class="village-list">
+                                        ${c.allInRange.map(v => `
+                                            <div class="village-item">
+                                                <span class="village-name" title="${v.name}">${v.name}</span>
+                                                <span class="village-dist">${v.dist} Felder</span>
+                                                <a href="https://dep20.die-staemme.de/game.php?screen=map&x=${v.x}&y=${v.y}" target="_blank" class="map-link">Map</a>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += `</tbody></table></div>`;
+                });
+
+                resultsEl.innerHTML = html || '<div class="no-results"><i class="fas fa-search"></i> Keine Gegner in Reichweite.</div>';
+
+            } catch (err) {
+                setStatus('Fehler: ' + err.message, 'error');
+                console.error(err);
+            }
+        };
+
+        window.onload = async function() {
+            updateCacheInfo();
+            if (getCache(CACHE_VILLAGE) && getCache(CACHE_PLAYER)) {
+                setStatus('Daten aus Cache bereit!', 'success');
+            } else {
+                setStatus('Lade Welt-Daten...', 'loading');
+                await loadData();
+            }
+
+            const allyText = getCache(CACHE_ALLY);
+            if (allyText) {
+                const stammMap = new Map();
+                const allyLines = parseLines(allyText);
+                for (const line of allyLines) {
+                    const a = line.split(',');
+                    if (a.length < 2) continue;
+                    const stammId = parseInt(a[0]);
+                    const name = decodeName(a[1]);
+                    stammMap.set(stammId, name);
+                }
+                loadBundnisCheckboxes(stammMap);
+            }
+        };
+    </script>
+</body>
+</html>
