@@ -11,17 +11,20 @@
         th { background-color: #f2f2f2; }
         .new { background-color: #ffff99; } /* Hervorhebung für neue Tools */
         #notification { color: red; font-weight: bold; margin-bottom: 10px; display: none; }
+        a { color: #007bff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
     <h1>Übersicht über Tools im /web-Ordner</h1>
-    <p>Stand: <span id="timestamp"></span> | Diese Seite lädt dynamisch die Liste von GitHub und überprüft auf neue Dateien (basierend auf LocalStorage in deinem Browser).</p>
+    <p>Stand: <span id="timestamp"></span> | Diese Seite lädt dynamisch die Liste von GitHub und überprüft auf neue Dateien (basierend auf LocalStorage in deinem Browser). Web-Links führen zur live Seite (GitHub Pages), GitHub-Links zum Code.</p>
     <div id="notification"></div>
     <table id="tools-table">
         <thead>
             <tr>
                 <th>Dateiname</th>
-                <th>Link</th>
+                <th>Web-Link (GitHub Pages)</th>
+                <th>GitHub-Link (Code)</th>
                 <th>Kurze Info</th>
             </tr>
         </thead>
@@ -33,6 +36,7 @@
         const path = 'web';
         const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
         const selfFile = 'index.html'; // Ändere das, falls du die Datei umbenennst
+        const basePagesUrl = 'https://heiko1988.github.io/ds/web/';
 
         async function fetchTools() {
             try {
@@ -72,13 +76,23 @@
                     nameCell.textContent = file.name;
                     row.appendChild(nameCell);
 
-                    // Link
-                    const linkCell = document.createElement('td');
-                    const link = document.createElement('a');
-                    link.href = file.html_url;
-                    link.textContent = 'GitHub-Seite';
-                    linkCell.appendChild(link);
-                    row.appendChild(linkCell);
+                    // Web-Link (GitHub Pages)
+                    const webCell = document.createElement('td');
+                    const webLink = document.createElement('a');
+                    webLink.href = basePagesUrl + file.name;
+                    webLink.textContent = 'Live-Seite öffnen';
+                    webLink.target = '_blank'; // In neuem Tab
+                    webCell.appendChild(webLink);
+                    row.appendChild(webCell);
+
+                    // GitHub-Link (Code)
+                    const githubCell = document.createElement('td');
+                    const githubLink = document.createElement('a');
+                    githubLink.href = file.html_url;
+                    githubLink.textContent = 'Code ansehen';
+                    githubLink.target = '_blank'; // In neuem Tab
+                    githubCell.appendChild(githubLink);
+                    row.appendChild(githubCell);
 
                     // Kurze Info (Title + Beschreibung aus Inhalt)
                     const infoCell = document.createElement('td');
@@ -98,7 +112,7 @@
                 document.getElementById('timestamp').textContent = new Date().toLocaleString('de-DE');
             } catch (error) {
                 console.error('Fehler beim Laden:', error);
-                document.querySelector('#tools-table tbody').innerHTML = '<tr><td colspan="3">Fehler beim Laden der Daten. Probiere es später erneut.</td></tr>';
+                document.querySelector('#tools-table tbody').innerHTML = '<tr><td colspan="4">Fehler beim Laden der Daten. Probiere es später erneut.</td></tr>';
             }
         }
 
