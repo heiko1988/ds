@@ -3,121 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tools-Übersicht im Web-Ordner</title>
+    <title>NEON NEXUS // TOOLS 2049</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .new { background-color: #ffff99; } /* Hervorhebung für neue Tools */
-        #notification { color: red; font-weight: bold; margin-bottom: 10px; display: none; }
-        a { color: #007bff; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-magenta: #ff00ff;
+            --neon-blue: #00aaff;
+            --bg-dark: #0d0d1a;
+            --grid-line: rgba(0, 255, 255, 0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg-dark);
+            color: var(--neon-cyan);
+            font-family: 'Orbitron', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridPulse 8s infinite linear;
+        }
+
+        @keyframes gridPulse {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(to bottom, transparent, var(--neon-cyan), transparent);
+            animation: scan 4s linear infinite;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(-100vh); }
+            100% { transform: translateY(100vh); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .glitch {
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--neon-cyan);
+            text-shadow: 
+                0 0 10px var(--neon-cyan),
+                0 0 20px var(--neon-cyan),
+                0 0 40px var(--neon-cyan),
+                0 0 80px var(--neon-cyan);
+            animation: glitch 2s infinite;
+            position: relative;
+        }
+
+        .glitch::before, .glitch::after {
+            content: 'NEON NEXUS // TOOLS 2049';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            color: var(--neon-magenta);
+            clip-path: inset(0 0 0 0);
+            animation: glitch-skew 2s infinite;
+        }
+
+        .glitch::before {
+            left: 2px;
+            text-shadow: -2px 0 var(--neon-magenta);
+            animation: glitch-1 0.8s infinite linear alternate-reverse;
+        }
+
+        .glitch::after {
+            left: -2px;
+            text-shadow: 2px 0 var(--neon-blue);
+            animation: glitch-2 1.2s infinite linear alternate;
+        }
+
+        @keyframes glitch {
+            0%, 100% { text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px, 0 0 40px, 0 0 80px; }
+            50% { text-shadow: 0 0 5px var(--neon-cyan), 0 0 10px, 0 0 20px; }
+        }
+
+        @keyframes glitch-1 {
+            0%, 100% { clip-path: inset(0 0 0 0); }
+            20% { clip-path: inset(90% 0 0 0); }
+            40% { clip-path: inset(0 0 80% 0); }
+            60% { clip-path: inset(70% 0 0 0); }
+            80% { clip-path: inset(0 0 90% 0); }
+        }
+
+        @keyframes glitch-2 {
+            0%, 100% { clip-path: inset(0 0 0 0); }
+            25% { clip-path: inset(0 0 60% 0); }
+            50% { clip-path: inset(80% 0 0 0); }
+            75% { clip-path: inset(0 0 90% 0); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            color: var(--neon-blue);
+            text-shadow: 0 0 10px var(--neon-blue);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        #notification {
+            background: rgba(255, 0, 255, 0.15);
+            border: 1px solid var(--neon-magenta);
+            color: var(--neon-magenta);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--neon-magenta);
+            display: none;
+            animation: alertPulse 2s infinite;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { box-shadow: 0 0 10px var(--neon-magenta); }
+            50% { box-shadow: 0 0 20px var(--neon-magenta), 0 0 30px; }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 2rem;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--neon-cyan);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 255, 0.3),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+        }
+
+        th {
+            background: rgba(0, 255, 255, 0.1);
+            color: var(--neon-cyan);
+            padding: 1.2rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 10px var(--neon-cyan);
+            border-bottom: 1px solid var(--neon-cyan);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px dashed rgba(0, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        tr:hover td {
+            background: rgba(0, 255, 255, 0.05);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+        }
+
+        .new {
+            background: rgba(255, 255, 153, 0.1) !important;
+            animation: newGlow 2s infinite;
+        }
+
+        @keyframes newGlow {
+            0%, 100% { box-shadow: 0 0 10px #ffff99; }
+            50% { box-shadow: 0 0 25px #ffff99, 0 0 35px #ffff99; }
+        }
+
+        a {
+            color: var(--neon-blue);
+            text-decoration: none;
+            font-weight: 700;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        a::after {
+            content: ' ▸';
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        a:hover {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px var(--neon-cyan);
+        }
+
+        a:hover::after {
+            opacity: 1;
+        }
+
+        .info-cell {
+            font-size: 0.9rem;
+            max-width: 500px;
+            color: #a0f7ff;
+        }
+
+        .timestamp {
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+            font-size: 0.9rem;
+            color: var(--neon-magenta);
+            text-shadow: 0 0 8px var(--neon-magenta);
+        }
+
+        .hologram {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 1;
+            animation: hologram 15s infinite linear;
+        }
+
+        @keyframes hologram {
+            0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); }
+            100% { transform: translate(-50%, -50%) rotate(360deg) scale(1.2); }
+        }
+
+        @media (max-width: 768px) {
+            .glitch { font-size: 2rem; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 0.5rem; }
+        }
     </style>
 </head>
 <body>
-    <h1>Übersicht über Tools im /web-Ordner</h1>
-    <p>Stand: <span id="timestamp"></span> | Diese Seite lädt dynamisch die Liste von GitHub und überprüft auf neue Dateien (basierend auf LocalStorage in deinem Browser). Web-Links führen zur live Seite (GitHub Pages), GitHub-Links zum Code.</p>
-    <div id="notification"></div>
-    <table id="tools-table">
-        <thead>
-            <tr>
-                <th>Dateiname</th>
-                <th>Web-Link (GitHub Pages)</th>
-                <th>GitHub-Link (Code)</th>
-                <th>Kurze Info</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <div class="scanline"></div>
+    <div class="hologram"></div>
+
+    <div class="container">
+        <header>
+            <div class="glitch">NEON NEXUS // TOOLS 2049</div>
+            <div class="subtitle">Datenfluss aktiviert – Systemscan läuft...</div>
+            <div class="timestamp">Stand: <span id="timestamp"></span></div>
+        </header>
+
+        <div id="notification"></div>
+
+        <table id="tools-table">
+            <thead>
+                <tr>
+                    <th>MODUL-ID</th>
+                    <th>WEB-INTERFACE</th>
+                    <th>QUELLCODE</th>
+                    <th>FUNKTIONSSCAN</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
 
     <script>
         const repo = 'heiko1988/ds';
         const path = 'web';
         const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
-        const selfFile = 'index.html'; // Ändere das, falls du die Datei umbenennst
+        const selfFile = 'tools-list.html';
         const basePagesUrl = 'https://heiko1988.github.io/ds/web/';
 
         async function fetchTools() {
             try {
-                // Ordner-Inhalt fetchen
                 const response = await fetch(apiUrl);
                 const files = await response.json();
-
-                // Nur .html-Dateien filtern, exklusive dieser Datei selbst
                 const htmlFiles = files.filter(f => f.name.endsWith('.html') && f.name !== selfFile);
 
-                // Letzte bekannte Liste aus LocalStorage holen
                 const lastFiles = JSON.parse(localStorage.getItem('lastToolsList')) || [];
                 const currentFiles = htmlFiles.map(f => f.name).sort();
                 const newFiles = currentFiles.filter(name => !lastFiles.includes(name));
 
-                // Benachrichtigung, wenn neu
                 const notification = document.getElementById('notification');
                 if (newFiles.length > 0) {
-                    notification.textContent = `Neue Tools hinzugefügt: ${newFiles.join(', ')}`;
+                    notification.innerHTML = `⚡ NEUE MODULE ENTDECKT: <strong>${newFiles.join('</strong> | <strong>')}</strong> ⚡`;
                     notification.style.display = 'block';
                 }
 
-                // Neue Liste speichern
                 localStorage.setItem('lastToolsList', JSON.stringify(currentFiles));
 
-                // Tabelle bauen
                 const tbody = document.querySelector('#tools-table tbody');
-                tbody.innerHTML = ''; // Leeren
+                tbody.innerHTML = '';
+
                 for (const file of htmlFiles) {
                     const row = document.createElement('tr');
-                    if (newFiles.includes(file.name)) {
-                        row.classList.add('new');
-                    }
+                    if (newFiles.includes(file.name)) row.classList.add('new');
 
-                    // Dateiname
-                    const nameCell = document.createElement('td');
-                    nameCell.textContent = file.name;
-                    row.appendChild(nameCell);
+                    // MODUL-ID
+                    const idCell = document.createElement('td');
+                    idCell.textContent = file.name;
+                    row.appendChild(idCell);
 
-                    // Web-Link (GitHub Pages)
+                    // WEB-INTERFACE
                     const webCell = document.createElement('td');
                     const webLink = document.createElement('a');
                     webLink.href = basePagesUrl + file.name;
-                    webLink.textContent = 'Live-Seite öffnen';
-                    webLink.target = '_blank'; // In neuem Tab
+                    webLink.textContent = 'LIVE-ACCESS';
+                    webLink.target = '_blank';
                     webCell.appendChild(webLink);
                     row.appendChild(webCell);
 
-                    // GitHub-Link (Code)
-                    const githubCell = document.createElement('td');
-                    const githubLink = document.createElement('a');
-                    githubLink.href = file.html_url;
-                    githubLink.textContent = 'Code ansehen';
-                    githubLink.target = '_blank'; // In neuem Tab
-                    githubCell.appendChild(githubLink);
-                    row.appendChild(githubCell);
+                    // QUELLCODE
+                    const codeCell = document.createElement('td');
+                    const codeLink = document.createElement('a');
+                    codeLink.href = file.html_url;
+                    codeLink.textContent = 'SOURCE-MATRIX';
+                    codeLink.target = '_blank';
+                    codeCell.appendChild(codeLink);
+                    row.appendChild(codeCell);
 
-                    // Kurze Info (Title + Beschreibung aus Inhalt)
+                    // FUNKTIONSSCAN
                     const infoCell = document.createElement('td');
-                    const content = await fetch(file.download_url).then(res => res.text());
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(content, 'text/html');
-                    const title = doc.querySelector('title')?.textContent.trim() || 'Kein Title';
-                    const descElem = doc.querySelector('h1, p'); // Erstes H1 oder P
-                    const description = descElem?.textContent.trim().slice(0, 100) + '...' || 'Keine Beschreibung verfügbar';
-                    infoCell.textContent = `${title}: ${description}`;
+                    infoCell.className = 'info-cell';
+                    try {
+                        const content = await fetch(file.download_url).then(res => res.text());
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(content, 'text/html');
+                        const title = doc.querySelector('title')?.textContent.trim() || 'UNBEKANNT';
+                        const descElem = doc.querySelector('h1, p');
+                        const desc = descElem?.textContent.trim().slice(0, 120) + '...' || 'KEINE DATEN';
+                        infoCell.innerHTML = `<strong>[${title}]</strong><br>${desc}`;
+                    } catch (e) {
+                        infoCell.textContent = 'SCAN FEHLER';
+                    }
                     row.appendChild(infoCell);
 
                     tbody.appendChild(row);
                 }
 
-                // Timestamp setzen
                 document.getElementById('timestamp').textContent = new Date().toLocaleString('de-DE');
             } catch (error) {
-                console.error('Fehler beim Laden:', error);
-                document.querySelector('#tools-table tbody').innerHTML = '<tr><td colspan="4">Fehler beim Laden der Daten. Probiere es später erneut.</td></tr>';
+                console.error('SYSTEMFEHLER:', error);
+                document.querySelector('#tools-table tbody').innerHTML = '<tr><td colspan="4" style="color:#ff00ff; text-align:center;">⚠️ VERBINDUNG ZUM NEXUS UNTERBROCHEN ⚠️</td></tr>';
             }
         }
 
-        // Beim Laden ausführen
+        // INIT
         fetchTools();
+        setInterval(() => {
+            const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン';
+            document.querySelectorAll('td, th').forEach(el => {
+                if (Math.random() < 0.02) {
+                    const orig = el.textContent;
+                    el.textContent = Array.from(orig).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
+                    setTimeout(() => el.textContent = orig, 200);
+                }
+            });
+        }, 3000);
     </script>
 </body>
 </html>
