@@ -5,39 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Goldmünzen Rechner</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); padding: 40px; overflow: hidden; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            margin: 0; padding: 20px; color: #333; 
+        }
+        .container { 
+            max-width: 900px; margin: 0 auto; background: white; border-radius: 20px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); padding: 40px; overflow: hidden; 
+        }
         h1 { text-align: center; color: #4a5568; margin-bottom: 30px; font-size: 2.5em; }
-        .input-group { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .input-group { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; margin-bottom: 30px; 
+        }
         label { display: flex; flex-direction: column; font-weight: bold; color: #2d3748; }
-        input[type="number"] { padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; transition: border-color 0.3s; margin-top: 5px; }
-        input[type="number"]:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        input[type="number"], select { 
+            padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; 
+            font-size: 16px; transition: border-color 0.3s; margin-top: 5px; 
+        }
+        input[type="number"]:focus, select:focus { 
+            outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); 
+        }
         .percent { font-size: 0.9em; color: #718096; font-weight: normal; margin-top: 5px; }
-        button { grid-column: 1 / -1; padding: 15px 30px; background: linear-gradient(135deg, #48bb78, #38a169); color: white; border: none; border-radius: 50px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3); }
+        button { 
+            grid-column: 1 / -1; padding: 15px 30px; background: linear-gradient(135deg, #48bb78, #38a169); 
+            color: white; border: none; border-radius: 50px; font-size: 18px; font-weight: bold; 
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; 
+            box-shadow: 0 10px 20px rgba(72, 187, 120, 0.3); 
+        }
         button:hover { transform: translateY(-2px); box-shadow: 0 15px 30px rgba(72, 187, 120, 0.4); }
         button:active { transform: translateY(0); }
         .results { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { background: linear-gradient(135deg, #f7fafc, #edf2f7); border-radius: 15px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-left: 5px solid #667eea; }
+        .card { background: linear-gradient(135deg, #f7fafc, #edf2f7); border-radius: 15px; padding: 25px; 
+                 box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-left: 5px solid #667eea; }
         .card h2 { margin-top: 0; color: #2d3748; font-size: 1.5em; }
         .card h3 { color: #4a5568; margin-bottom: 15px; }
         ul { list-style: none; padding: 0; }
-        li { background: white; margin: 10px 0; padding: 15px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        li { background: white; margin: 10px 0; padding: 15px; border-radius: 10px; 
+             box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.2s; }
         li:hover { transform: translateX(5px); }
         .diff-positive { color: #38a169; font-weight: bold; }
         .diff-negative { color: #e53e3e; font-weight: bold; }
-        .highlight { background: linear-gradient(135deg, #fed7d7, #feb2b2); padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 5px solid #fc8181; }
+        .highlight { background: linear-gradient(135deg, #fed7d7, #feb2b2); padding: 20px; 
+                     border-radius: 10px; margin: 20px 0; border-left: 5px solid #fc8181; }
         .number { font-size: 1.2em; font-weight: bold; }
-        @media (max-width: 768px) { .input-group { grid-template-columns: 1fr; } }
-        .template-group { grid-column: 1 / -1; display: flex; gap: 15px; align-items: end; margin-bottom: 20px; }
+        .template-group { 
+            grid-column: 1 / -1; display: flex; gap: 15px; align-items: end; margin-bottom: 20px; 
+            flex-wrap: wrap;
+        }
         .template-group select, .template-group input { margin-top: 0; }
         .template-group button { padding: 10px 20px; font-size: 16px; grid-column: initial; }
+        @media (max-width: 768px) { .input-group { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🪙 Goldmünzen Rechner</h1>
-        <p style="text-align: center; color: #718096; margin-bottom: 30px;">Gib deine Lagerbestände, Kosten und Vorlagen ein. Der Rechner zeigt dir, wie viele Münzen du <strong>ohne</strong> und <strong>mit Tausch (1:1)</strong> baust – inkl. genauer Anleitung!</p>
-        
+        <h1>Goldmünzen Rechner</h1>
+        <p style="text-align: center; color: #718096; margin-bottom: 30px;">
+            Gib deine Lagerbestände, ankommende Ressourcen, Lagergrenzen und Münzkosten ein. 
+            <strong>Alle Werte werden automatisch gespeichert!</strong>
+        </p>
+
+        <!-- Vorlagen -->
         <div class="template-group">
             <label>Vorlage laden
                 <select id="templateSelect">
@@ -47,25 +77,27 @@
             <label>Vorlagename
                 <input type="text" id="templateName" placeholder="z.B. Welt 20">
             </label>
-            <button onclick="saveTemplate()">Speichern</button>
-            <button onclick="deleteTemplate()">Löschen</button>
+            <button type="button" onclick="saveTemplate()">Speichern</button>
+            <button type="button" onclick="deleteTemplate()">Löschen</button>
         </div>
 
+        <!-- Aktuelle Ressourcen -->
         <div class="input-group">
             <label> Holz (aktuell)
-                <input type="number" id="holz" min="0" step="1">
+                <input type="number" id="holz" min="0" step="1" value="0">
                 <span class="percent" id="pHolz">-</span>
             </label>
             <label> Lehm (aktuell)
-                <input type="number" id="lehm" min="0" step="1">
+                <input type="number" id="lehm" min="0" step="1" value="0">
                 <span class="percent" id="pLehm">-</span>
             </label>
             <label> Eisen (aktuell)
-                <input type="number" id="eisen" min="0" step="1">
+                <input type="number" id="eisen" min="0" step="1" value="0">
                 <span class="percent" id="pEisen">-</span>
             </label>
         </div>
 
+        <!-- Ankommende Ressourcen -->
         <div class="input-group">
             <label> Holz (ankommend)
                 <input type="number" id="addHolz" min="0" step="1" value="0">
@@ -78,116 +110,120 @@
             </label>
         </div>
 
+        <!-- Lagergrenzen -->
         <div class="input-group">
-            <label> Max Holz (Lagergrenze)
-                <input type="number" id="maxHolz" min="0" step="1">
+            <label> Max Holz (Lager)
+                <input type="number" id="maxHolz" min="0" step="1" value="0">
             </label>
-            <label> Max Lehm (Lagergrenze)
-                <input type="number" id="maxLehm" min="0" step="1">
+            <label> Max Lehm (Lager)
+                <input type="number" id="maxLehm" min="0" step="1" value="0">
             </label>
-            <label> Max Eisen (Lagergrenze)
-                <input type="number" id="maxEisen" min="0" step="1">
+            <label> Max Eisen (Lager)
+                <input type="number" id="maxEisen" min="0" step="1" value="0">
             </label>
         </div>
 
+        <!-- Münzkosten -->
         <div class="input-group">
             <label> Holz pro Münze
-                <input type="number" id="ch" min="0" step="1">
+                <input type="number" id="ch" min="0" step="1" value="25200">
             </label>
             <label> Lehm pro Münze
-                <input type="number" id="cl" min="0" step="1">
+                <input type="number" id="cl" min="0" step="1" value="27000">
             </label>
             <label> Eisen pro Münze
-                <input type="number" id="ce" min="0" step="1">
+                <input type="number" id="ce" min="0" step="1" value="22500">
             </label>
         </div>
 
-        <button onclick="calculate()">🔄 Berechnen</button>
+        <button type="button" onclick="calculate()">Berechnen</button>
 
-        <div class="results" id="results" style="display: none;">
-            <!-- Dynamisch gefüllt -->
-        </div>
+        <div class="results" id="results" style="display: none;"></div>
     </div>
 
     <script>
-        const inputs = ['holz', 'lehm', 'eisen', 'addHolz', 'addLehm', 'addEisen', 'maxHolz', 'maxLehm', 'maxEisen', 'ch', 'cl', 'ce'];
+        const INPUT_IDS = ['holz', 'lehm', 'eisen', 'addHolz', 'addLehm', 'addEisen', 'maxHolz', 'maxLehm', 'maxEisen', 'ch', 'cl', 'ce'];
         const TEMPLATES_KEY = 'goldmuenzen_vorlagen';
 
-        // Lade gespeicherte Werte und Vorlagen
+        // === Lade gespeicherte Werte ===
         function loadSaved() {
-            inputs.forEach(id => {
-                const val = localStorage.getItem(id);
-                if (val !== null) document.getElementById(id).value = val;
+            INPUT_IDS.forEach(id => {
+                const saved = localStorage.getItem(id);
+                if (saved !== null) document.getElementById(id).value = saved;
             });
             loadTemplates();
         }
 
-        // Speichere Werte
+        // === Speichere Eingaben ===
         function saveValues() {
-            inputs.forEach(id => {
-                localStorage.setItem(id, document.getElementById(id).value);
+            INPUT_IDS.forEach(id => {
+                const val = document.getElementById(id).value;
+                localStorage.setItem(id, val);
             });
         }
 
-        // Lade Vorlagen in Dropdown
+        // === Vorlagen laden ===
         function loadTemplates() {
             const templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
             const select = document.getElementById('templateSelect');
             select.innerHTML = '<option value="">-- Wähle Vorlage --</option>';
             templates.forEach(t => {
-                const option = document.createElement('option');
-                option.value = t.name;
-                option.textContent = t.name;
-                select.appendChild(option);
+                const opt = document.createElement('option');
+                opt.value = t.name;
+                opt.textContent = t.name;
+                select.appendChild(opt);
             });
         }
 
-        // Speichere Vorlage
+        // === Vorlage speichern ===
         function saveTemplate() {
             const name = document.getElementById('templateName').value.trim();
-            if (!name) return alert('Vorlagename eingeben!');
+            if (!name) return alert('Bitte Vorlagename eingeben!');
             const ch = parseInt(document.getElementById('ch').value) || 0;
             const cl = parseInt(document.getElementById('cl').value) || 0;
             const ce = parseInt(document.getElementById('ce').value) || 0;
+
             let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
-            templates = templates.filter(t => t.name !== name); // Überschreiben
+            templates = templates.filter(t => t.name !== name);
             templates.push({ name, ch, cl, ce });
             localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
             loadTemplates();
-            alert('Vorlage gespeichert!');
+            alert(`Vorlage "${name}" gespeichert!`);
         }
 
-        // Lade Vorlage
-        document.getElementById('templateSelect').addEventListener('change', (e) => {
-            const name = e.target.value;
+        // === Vorlage löschen ===
+        function deleteTemplate() {
+            const name = document.getElementById('templateName').value.trim();
+            if (!name) return alert('Bitte Vorlagename eingeben!');
+            if (!confirm(`Vorlage "${name}" wirklich löschen?`)) return;
+
+            let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
+            templates = templates.filter(t => t.name !== name);
+            localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
+            document.getElementById('templateName').value = '';
+            loadTemplates();
+            alert(`Vorlage "${name}" gelöscht!`);
+        }
+
+        // === Vorlage laden ===
+        document.getElementById('templateSelect').addEventListener('change', function() {
+            const name = this.value;
             if (!name) return;
             const templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
-            const template = templates.find(t => t.name === name);
-            if (template) {
+            const t = templates.find(x => x.name === name);
+            if (t) {
+                document.getElementById('ch').value = t.ch;
+                document.getElementById('cl').value = t.cl;
+                document.getElementById('ce').value = t.ce;
                 document.getElementById('templateName').value = name;
-                document.getElementById('ch').value = template.ch;
-                document.getElementById('cl').value = template.cl;
-                document.getElementById('ce').value = template.ce;
                 saveValues();
                 calculate();
             }
         });
 
-        // Lösch Vorlage
-        function deleteTemplate() {
-            const name = document.getElementById('templateName').value.trim();
-            if (!name) return alert('Vorlagename eingeben!');
-            let templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
-            templates = templates.filter(t => t.name !== name);
-            localStorage.setItem(TEMPLATES_KEY, JSON.stringify(templates));
-            loadTemplates();
-            document.getElementById('templateName').value = '';
-            alert('Vorlage gelöscht!');
-        }
-
-        // Berechnung
+        // === Berechnung ===
         function calculate() {
-            saveValues();
+            saveValues(); // Speichert ALLES
 
             const H = parseInt(document.getElementById('holz').value) || 0;
             const L = parseInt(document.getElementById('lehm').value) || 0;
@@ -205,52 +241,47 @@
             const Cl = parseInt(document.getElementById('cl').value) || 0;
             const Ce = parseInt(document.getElementById('ce').value) || 0;
 
-            const S = H + L + E;
             const totalC = Ch + Cl + Ce;
-
             if (totalC === 0) {
                 document.getElementById('results').style.display = 'none';
                 return;
             }
 
-            // Prozente
-            document.getElementById('pHolz').textContent = S > 0 ? (H / S * 100).toFixed(2) + '%' : '0%';
-            document.getElementById('pLehm').textContent = S > 0 ? (L / S * 100).toFixed(2) + '%' : '0%';
-            document.getElementById('pEisen').textContent = S > 0 ? (E / S * 100).toFixed(2) + '%' : '0%';
-
-            // Gesamt nach Add
             const totalH = H + addH;
             const totalL = L + addL;
             const totalE = E + addE;
             const totalS = totalH + totalL + totalE;
 
-            // Überfüllung prüfen
+            // Prozente
+            const S = H + L + E;
+            document.getElementById('pHolz').textContent = S > 0 ? (H / S * 100).toFixed(2) + '%' : '0%';
+            document.getElementById('pLehm').textContentInput = S > 0 ? (L / S * 100).toFixed(2) + '%' : '0%';
+            document.getElementById('pEisen').textContent = S > 0 ? (E / S * 100).toFixed(2) + '%' : '0%';
+
+            // Überfüllung
             const overH = totalH > maxH ? totalH - maxH : 0;
             const overL = totalL > maxL ? totalL - maxL : 0;
             const overE = totalE > maxE ? totalE - maxE : 0;
+            const totalOver = overH + overL + overE;
 
-            let overfillHTML = '';
-            if (overH + overL + overE > 0) {
-                overfillHTML = '<div class="card" style="grid-column: 1 / -1; border-left-color: #fc8181;"> <h2>⚠️ Lagerüberfüllung!</h2> <p>Überschuss: Holz ${overH.toLocaleString('de-DE')}, Lehm ${overL.toLocaleString('de-DE')}, Eisen ${overE.toLocaleString('de-DE')}</p> </div>';
-            }
-
-            // Ohne Tausch (basierend auf total)
+            // Ohne Tausch
             const mH = Math.floor(totalH / Ch);
             const mL = Math.floor(totalL / Cl);
             const mE = Math.floor(totalE / Ce);
             const ohne = Math.min(mH, mL, mE);
-            let limit = [];
+            const limit = [];
             if (mH === ohne) limit.push('Holz');
             if (mL === ohne) limit.push('Lehm');
             if (mE === ohne) limit.push('Eisen');
-            const limitStr = limit.join(', ');
 
-            // Mit Tausch (maximal, ohne Kappe)
+            // Mit Tausch (maximal)
             let mit = Math.floor(totalS / totalC);
-
-            // Mit Kappe (Lagergrenzen)
-            const maxMByCap = Math.min(Math.floor(maxH / Ch), Math.floor(maxL / Cl), Math.floor(maxE / Ce), mit);
-            mit = maxMByCap; // Begrenze auf Kappe
+            const cappedByStorage = Math.min(
+                maxH === Infinity ? mit : Math.floor(maxH / Ch),
+                maxL === Infinity ? mit : Math.floor(maxL / Cl),
+                maxE === Infinity ? mit : Math.floor(maxE / Ce)
+            );
+            mit = Math.min(mit, cappedByStorage);
 
             const rest = totalS - mit * totalC;
             const targetH = mit * Ch;
@@ -260,6 +291,7 @@
             const diffL = totalL - targetL;
             const diffE = totalE - targetE;
 
+            // Tauschplan
             const ueberschuesse = [];
             if (diffH > 0) ueberschuesse.push({ from: 'Holz', amt: diffH });
             if (diffL > 0) ueberschuesse.push({ from: 'Lehm', amt: diffL });
@@ -270,72 +302,91 @@
             if (diffL < 0) defizite.push({ to: 'Lehm', amt: -diffL });
             if (diffE < 0) defizite.push({ to: 'Eisen', amt: -diffE });
 
-            let anleitungHTML = '<h3>📋 Genaue Tausch-Anleitung</h3><p>Um <strong>' + mit.toLocaleString('de-DE') + '</strong> Münzen zu bauen:</p><ul>';
-            ueberschuesse.sort((a, b) => b.amt - a.amt);
-            let uebIdx = 0;
-            for (let d of defizite) {
-                let remaining = d.amt;
-                while (remaining > 0 && uebIdx < ueberschuesse.length) {
-                    const u = ueberschuesse[uebIdx];
-                    const take = Math.min(remaining, u.amt);
-                    anleitungHTML += `<li>🔄 Tausche <span class="number">${take.toLocaleString('de-DE')}</span> ${u.from} → ${d.to}</li>`;
-                    u.amt -= take;
-                    remaining -= take;
-                    if (u.amt === 0) uebIdx++;
+            let anleitung = '<h3>Genaue Tausch-Anleitung</h3><p>Um <strong>' + mit.toLocaleString('de-DE') + '</strong> Münzen zu bauen:</p><ul>';
+            if (defizite.length === 0) {
+                anleitung = '<h3>Kein Tausch nötig!</h3><p>Du hast genug für ' + mit.toLocaleString('de-DE') + ' Münzen.</p>';
+            } else {
+                ueberschuesse.sort((a, b) => b.amt - a.amt);
+                let idx = 0;
+                for (let d of defizite) {
+                    let rem = d.amt;
+                    while (rem > 0 && idx < ueberschuesse.length) {
+                        const u = ueberschuesse[idx];
+                        const take = Math.min(rem, u.amt);
+                        anleitung += `<li>Tausche <span class="number">${take.toLocaleString('de-DE')}</span> ${u.from} → ${d.to}</li>`;
+                        u.amt -= take;
+                        rem -= take;
+                        if (u.amt === 0) idx++;
+                    }
                 }
+                anleitung += '</ul>';
             }
-            anleitungHTML += '</ul>';
-            if (defizite.length === 0) anleitungHTML = '<h3>📋 Kein Tausch nötig!</h3><p>Du hast genug für ' + mit.toLocaleString('de-DE') + ' Münzen.</p>';
 
-            // Wenn Überfüllung, Vorschlag für zusätzliche Münzen vor Ankunft
+            // Überfüllungsvorschlag
             let overfillSuggestion = '';
-            if (overH + overL + overE > 0) {
-                // Berechne, wie viele Münzen bauen, um Platz zu machen
-                const excessTotal = overH + overL + overE;
-                const extraM = Math.floor(excessTotal / totalC);
+            if (totalOver > 0) {
+                const extraM = Math.floor(totalOver / totalC);
                 if (extraM > 0) {
-                    overfillSuggestion = '<p><strong>Vorschlag:</strong> Baue vor Ankunft <span class="number">' + extraM.toLocaleString('de-DE') + '</span> zusätzliche Münzen, um Platz zu machen und Ressourcen zu nutzen. Passe Tausch entsprechend an.</p>';
+                    overfillSuggestion = `<p><strong>Tipp:</strong> Baue <span class="number">${extraM}</span> Münzen <u>vor</u> der Ankunft, um Platz zu schaffen!</p>`;
                 }
             }
 
+            // Ergebnis anzeigen
             document.getElementById('results').innerHTML = `
-                ${overfillHTML}
+                ${totalOver > 0 ? `<div class="card" style="grid-column: 1/-1; border-left-color: #e53e3e;">
+                    <h2>Lagerüberfüllung!</h2>
+                    <p>Überschuss: Holz <strong>${overH.toLocaleString('de-DE')}</strong> | Lehm <strong>${overL.toLocaleString('de-DE')}</strong> | Eisen <strong>${overE.toLocaleString('de-DE')}</strong></p>
+                    ${overfillSuggestion}
+                </div>` : ''}
+
                 <div class="card">
-                    <h2>⚡ Ohne Tausch</h2>
+                    <h2>Ohne Tausch</h2>
                     <div class="highlight">
                         <p class="number">${ohne.toLocaleString('de-DE')}</p>
-                        <p><strong>Limitierend:</strong> ${limitStr}</p>
+                        <p><strong>Limit:</strong> ${limit.join(', ')}</p>
                     </div>
                 </div>
+
                 <div class="card">
-                    <h2>🚀 Mit Tausch (maximal)</h2>
+                    <h2>Mit Tausch (max)</h2>
                     <div class="highlight">
                         <p class="number">${mit.toLocaleString('de-DE')}</p>
-                        <p>Restressourcen: <span class="number">${rest.toLocaleString('de-DE')}</span></p>
+                        <p>Rest: <span class="number">${rest.toLocaleString('de-DE')}</span></p>
                     </div>
                 </div>
+
                 <div class="card">
-                    <h3>🎯 Zielmengen</h3>
+                    <h3>Zielmengen</h3>
                     <ul>
-                        <li>Holz: <span class="number">${targetH.toLocaleString('de-DE')}</span><br> Gesamt: ${totalH.toLocaleString('de-DE')} | <span class="${diffH >= 0 ? 'diff-positive' : 'diff-negative'}">Diff: ${diffH >= 0 ? '+' : ''}${diffH.toLocaleString('de-DE')}</span></li>
-                        <li>Lehm: <span class="number">${targetL.toLocaleString('de-DE')}</span><br> Gesamt: ${totalL.toLocaleString('de-DE')} | <span class="${diffL >= 0 ? 'diff-positive' : 'diff-negative'}">Diff: ${diffL >= 0 ? '+' : ''}${diffL.toLocaleString('de-DE')}</span></li>
-                        <li>Eisen: <span class="number">${targetE.toLocaleString('de-DE')}</span><br> Gesamt: ${totalE.toLocaleString('de-DE')} | <span class="${diffE >= 0 ? 'diff-positive' : 'diff-negative'}">Diff: ${diffE >= 0 ? '+' : ''}${diffE.toLocaleString('de-DE')}</span></li>
+                        <li>Holz: <span class="number">${targetH.toLocaleString('de-DE')}</span> (aktuell ${totalH.toLocaleString('de-DE')}) 
+                            <span class="${diffH >= 0 ? 'diff-positive' : 'diff-negative'}">(${diffH >= 0 ? '+' : ''}${diffH.toLocaleString('de-DE')})</span>
+                        </li>
+                        <li>Lehm: <span class="number">${targetL.toLocaleString('de-DE')}</span> (aktuell ${totalL.toLocaleString('de-DE')}) 
+                            <span class="${diffL >= 0 ? 'diff-positive' : 'diff-negative'}">(${diffL >= 0 ? '+' : ''}${diffL.toLocaleString('de-DE')})</span>
+                        </li>
+                        <li>Eisen: <span class="number">${targetE.toLocaleString('de-DE')}</span> (aktuell ${totalE.toLocaleString('de-DE')}) 
+                            <span class="${diffE >= 0 ? 'diff-positive' : 'diff-negative'}">(${diffE >= 0 ? '+' : ''}${diffE.toLocaleString('de-DE')})</span>
+                        </li>
                     </ul>
                 </div>
-                <div class="card" style="grid-column: 1 / -1;">
-                    ${anleitungHTML}
-                    ${overfillSuggestion}
-                    <p style="margin-top: 20px; font-style: italic; color: #718096;"> 💡 Nach den Tauschen baust du <strong>${mit.toLocaleString('de-DE')}</strong> Münzen. Der Rest bleibt im Lager! </p>
+
+                <div class="card" style="grid-column: 1/-1;">
+                    ${anleitung}
+                    <p style="margin-top: 20px; font-style: italic; color: #718096;">
+                        Nach Tausch: Baue <strong>${mit.toLocaleString('de-DE')}</strong> Münzen. Rest bleibt im Lager.
+                    </p>
                 </div>
             `;
             document.getElementById('results').style.display = 'grid';
         }
 
-        // Initial load
+        // === Initialisierung ===
         window.addEventListener('load', () => {
             loadSaved();
-            inputs.forEach(id => document.getElementById(id).addEventListener('input', calculate));
-            calculate();
+            INPUT_IDS.forEach(id => {
+                document.getElementById(id).addEventListener('input', calculate);
+            });
+            calculate(); // Sofort berechnen
         });
     </script>
 </body>
