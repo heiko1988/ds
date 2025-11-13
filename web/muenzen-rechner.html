@@ -63,8 +63,7 @@
     <div class="container">
         <h1>Goldmünzen Rechner</h1>
         <p style="text-align: center; color: #718096; margin-bottom: 30px;">
-            Gib deine Lagerbestände, ankommende Ressourcen, Lagergrenzen und Münzkosten ein. 
-            <strong>Alle Werte werden automatisch gespeichert!</strong>
+            Alle Werte werden automatisch gespeichert. Vorlagen laden & speichern funktioniert!
         </p>
 
         <!-- Vorlagen -->
@@ -145,7 +144,7 @@
         const INPUT_IDS = ['holz', 'lehm', 'eisen', 'addHolz', 'addLehm', 'addEisen', 'maxHolz', 'maxLehm', 'maxEisen', 'ch', 'cl', 'ce'];
         const TEMPLATES_KEY = 'goldmuenzen_vorlagen';
 
-        // === Lade gespeicherte Werte ===
+        // Lade gespeicherte Werte
         function loadSaved() {
             INPUT_IDS.forEach(id => {
                 const saved = localStorage.getItem(id);
@@ -154,15 +153,14 @@
             loadTemplates();
         }
 
-        // === Speichere Eingaben ===
+        // Speichere Eingaben
         function saveValues() {
             INPUT_IDS.forEach(id => {
-                const val = document.getElementById(id).value;
-                localStorage.setItem(id, val);
+                localStorage.setItem(id, document.getElementById(id).value);
             });
         }
 
-        // === Vorlagen laden ===
+        // Vorlagen laden
         function loadTemplates() {
             const templates = JSON.parse(localStorage.getItem(TEMPLATES_KEY) || '[]');
             const select = document.getElementById('templateSelect');
@@ -175,7 +173,7 @@
             });
         }
 
-        // === Vorlage speichern ===
+        // Vorlage speichern
         function saveTemplate() {
             const name = document.getElementById('templateName').value.trim();
             if (!name) return alert('Bitte Vorlagename eingeben!');
@@ -191,7 +189,7 @@
             alert(`Vorlage "${name}" gespeichert!`);
         }
 
-        // === Vorlage löschen ===
+        // Vorlage löschen
         function deleteTemplate() {
             const name = document.getElementById('templateName').value.trim();
             if (!name) return alert('Bitte Vorlagename eingeben!');
@@ -205,7 +203,7 @@
             alert(`Vorlage "${name}" gelöscht!`);
         }
 
-        // === Vorlage laden ===
+        // Vorlage laden
         document.getElementById('templateSelect').addEventListener('change', function() {
             const name = this.value;
             if (!name) return;
@@ -221,9 +219,9 @@
             }
         });
 
-        // === Berechnung ===
+        // Berechnung
         function calculate() {
-            saveValues(); // Speichert ALLES
+            saveValues();
 
             const H = parseInt(document.getElementById('holz').value) || 0;
             const L = parseInt(document.getElementById('lehm').value) || 0;
@@ -252,10 +250,10 @@
             const totalE = E + addE;
             const totalS = totalH + totalL + totalE;
 
-            // Prozente
+            // Prozente (nur aktuelle)
             const S = H + L + E;
             document.getElementById('pHolz').textContent = S > 0 ? (H / S * 100).toFixed(2) + '%' : '0%';
-            document.getElementById('pLehm').textContentInput = S > 0 ? (L / S * 100).toFixed(2) + '%' : '0%';
+            document.getElementById('pLehm').textContent = S > 0 ? (L / S * 100).toFixed(2) + '%' : '0%';
             document.getElementById('pEisen').textContent = S > 0 ? (E / S * 100).toFixed(2) + '%' : '0%';
 
             // Überfüllung
@@ -274,7 +272,7 @@
             if (mL === ohne) limit.push('Lehm');
             if (mE === ohne) limit.push('Eisen');
 
-            // Mit Tausch (maximal)
+            // Mit Tausch
             let mit = Math.floor(totalS / totalC);
             const cappedByStorage = Math.min(
                 maxH === Infinity ? mit : Math.floor(maxH / Ch),
@@ -331,7 +329,7 @@
                 }
             }
 
-            // Ergebnis anzeigen
+            // Ergebnis
             document.getElementById('results').innerHTML = `
                 ${totalOver > 0 ? `<div class="card" style="grid-column: 1/-1; border-left-color: #e53e3e;">
                     <h2>Lagerüberfüllung!</h2>
@@ -380,13 +378,13 @@
             document.getElementById('results').style.display = 'grid';
         }
 
-        // === Initialisierung ===
+        // Init
         window.addEventListener('load', () => {
             loadSaved();
             INPUT_IDS.forEach(id => {
                 document.getElementById(id).addEventListener('input', calculate);
             });
-            calculate(); // Sofort berechnen
+            calculate();
         });
     </script>
 </body>
