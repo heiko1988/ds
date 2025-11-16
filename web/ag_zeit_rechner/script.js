@@ -382,6 +382,40 @@ document.addEventListener('DOMContentLoaded', async () => {
         return tabPane;
     }
 
+    // Neu: Sortier-Funktion für Übersicht-Tabellen
+    function sortTable(tableId, column, asc = true) {
+        const table = document.getElementById(tableId);
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+        const header = table.querySelector(`th:nth-child(${column + 1})`);
+        rows.sort((a, b) => {
+            const aText = a.cells[column].textContent.trim();
+            const bText = b.cells[column].textContent.trim();
+            if (column === 3) { // Entfernung: Numeric
+                return asc ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
+            } else if (column === 4) { // Laufzeit: HH:MM:SS -> Sekunden
+                const toSeconds = (time) => {
+                    const [h, m, s] = time.split(':').map(Number);
+                    return h * 3600 + m * 60 + s;
+                };
+                return asc ? toSeconds(aText) - toSeconds(bText) : toSeconds(bText) - toSeconds(aText);
+            } else if (column === 5) { // Startzeit: Date-String -> Date
+                const aDate = new Date(aText);
+                const bDate = new Date(bText);
+                return asc ? aDate - bDate : bDate - aDate;
+            } else if (column === 6) { // Ankunft: Date-String -> Date
+                const aDate = new Date(aText);
+                const bDate = new Date(bText);
+                return asc ? aDate - bDate : bDate - aDate;
+            } else {
+                return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
+            }
+        });
+        rows.forEach(row => tbody.appendChild(row));
+        // Toggle Icon (↑↓)
+        header.innerHTML = header.innerHTML.replace(/ [↑↓]$/, '') + (asc ? ' ↑' : ' ↓');
+    }
+
     function updateOverview() {
         const overviewResults = document.querySelector('#overviewResults');
         if (!overviewResults) return;
@@ -391,12 +425,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        let allAttacks = [];
+        let allAttacksByProfile = {};
         profiles.forEach((profile, pIndex) => {
             if (!profile.target || !profile.target.x || !profile.target.y) return;
             const arrivalDate = parseArrivalTime(profile.arrivalTime);
             if (!arrivalDate) return;
             const speed = profile.speed || 35;
+            const profileAttacks = [];
             profile.villages.forEach(village => {
                 if (!village.x || !village.y) return;
                 const dx = village.x - profile.target.x;
@@ -405,28 +440,42 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const runtimeMs = dist * speed * 60 * 1000;
                 const startDate = calculateStartTime(arrivalDate, runtimeMs);
                 const runtimeStr = msToHHMMSS(runtimeMs);
-                allAttacks.push({
-                    profile: profile.name || `Profil ${pIndex + 1}`,
+                profileAttacks.push({
                     village: village.name || 'Unbenannt',
                     playerName: village.playerName || 'Unbekannt',
                     coords: `${village.x}|${village.y}`,
                     dist: dist.toFixed(1),
                     runtimeStr,
-                    startTime: startDate,
                     startTimeStr: formatDateTime(startDate),
                     arrival: formatDateTime(arrivalDate)
                 });
             });
+            if (profileAttacks.length > 0) {
+                allAttacksByProfile[profile.name || `Profil ${pIndex + 1}`] = profileAttacks;
+            }
         });
 
-        allAttacks.sort((a, b) => a.startTime - b.startTime);
-
-        let table = '<table class="table table-dark"><thead><tr><th>Profil</th><th>Dorf</th><th>Spieler</th><th>Koords</th><th>Entfernung</th><th>Laufzeit</th><th>Startzeit</th><th>Ankunft</th></tr></thead><tbody>';
-        allAttacks.forEach(attack => {
-            table += `<tr><td>${attack.profile}</td><td>${attack.village}</td><td>${attack.playerName}</td><td>${attack.coords}</td><td>${attack.dist}</td><td>${attack.runtimeStr}</td><td>${attack.startTimeStr}</td><td>${attack.arrival}</td></tr>`;
+        let html = '';
+        Object.entries(allAttacksByProfile).forEach(([profileName, attacks], index) => {
+            // Sortiere initial nach Startzeit
+            attacks.sort((a, b) => new Date(a.startTimeStr) - new Date(b.startTimeStr));
+            const tableId = `overview-table-${index}`;
+            html += `<h6 class="mt-4 mb-2">${profileName}</h6>`;
+            html += `<table class="table table-dark" id="${tableId}"><thead><tr>
+                <th onclick="sortTable('${tableId}', 0)">Dorf <span class="sort-icon">↑↓</span></th>
+                <th onclick="sortTable('${tableId}', 1)">Spieler <span class="sort-icon">↑↓</span></th>
+                <th onclick="sortTable('${tableId}', 2)">Koords <span class="sort-icon">↑↓</span></th>
+                <th onclick="sortTable('${tableId}', 3)">Entfernung <span class="sort-icon">↑↓</span></th>
+                <th onclick="sortTable('${tableId}', 4)">Laufzeit <span class="sort-icon">↑↓</span></th>
+                <th onclick="sortTable('${tableId}', 5)">Startzeit <span class="sort-icon">↑↓</span></th>
+                <th onclick="sortTable('${tableId}', 6)">Ankunft <span class="sort-icon">↑↓</span></th>
+            </tr></thead><tbody>`;
+            attacks.forEach(attack => {
+                html += `<tr><td>${attack.village}</td><td>${attack.playerName}</td><td>${attack.coords}</td><td>${attack.dist}</td><td>${attack.runtimeStr}</td><td>${attack.startTimeStr}</td><td>${attack.arrival}</td></tr>`;
+            });
+            html += '</tbody></table><hr class="my-3 bg-light opacity-25">'; // Abstand
         });
-        table += '</tbody></table>';
-        overviewResults.innerHTML = allAttacks.length ? table : '<p>Keine gültigen Angriffe.</p>';
+        overviewResults.innerHTML = Object.keys(allAttacksByProfile).length > 0 ? html : '<p>Keine gültigen Angriffe.</p>';
     }
 
     function updateTabNames() {
@@ -497,4 +546,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderTabs();
     window.loadVillage = loadVillage;
     window.deleteVillage = deleteVillage;
+    window.sortTable = sortTable; // Global für onclick
 });
