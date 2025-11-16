@@ -1,0 +1,27 @@
+body {
+    background-color: #212529;
+    color: #f8f9fa;
+}
+.nav-tabs .nav-link {
+    color: #f8f9fa;
+    background-color: #343a40;
+    border-color: #495057;
+}
+.nav-tabs .nav-link.active {
+    background-color: #495057;
+    border-color: #495057 #495057 #212529;
+}
+.card {
+    background-color: #343a40;
+    border: 1px solid #495057;
+}
+.table {
+    color: #f8f9fa;
+}
+.table thead th {
+    background-color: #495057;
+}
+.alert {
+    background-color: #dc3545;
+    color: #f8f9fa;
+}
