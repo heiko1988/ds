@@ -13,76 +13,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     let villagesByName = new Map();
     let mapLoaded = false;
 
-    // Cache Keys (wie in deinem Scanner)
-    const CACHE_VILLAGE = 'nobling_village_dep20';
-    const CACHE_PLAYER = 'nobling_player_dep20';
-    const CACHE_TIME = 'nobling_cache_time_dep20';
+    // URLs (kein Cache für immer aktuelle Daten – immer neu fetchen bei Load/Reload)
     const VILLAGE_ORIG = 'https://dep20.die-staemme.de/map/village.txt';
     const PLAYER_ORIG = 'https://dep20.die-staemme.de/map/player.txt';
 
-    function setMapStatus(msg, type = 'loading') {
+    function setMapStatus(msg, type = 'info') {
         mapStatus.innerHTML = `<div class="alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'}">${msg}</div>`;
     }
 
-    function updateCacheInfo() {
-        const time = localStorage.getItem(CACHE_TIME);
-        if (time) {
-            const date = new Date(parseInt(time));
-            mapStatus.innerHTML += `<small class="cache-info">Cache: ${date.toLocaleString()} | <button class="btn btn-sm btn-outline-warning" onclick="forceReloadMap()">Neu laden</button></small>`;
-        }
+    function getCurrentDateTime() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day} ${hours}:${minutes}:00`; // Format: YYYY-MM-DD HH:MM:SS
     }
 
-    function saveCache(key, data) {
+    async function loadMapData(forceReload = true) {
+        setMapStatus('Lade aktuelle Karte via Proxy...');
         try {
-            localStorage.setItem(key, data);
-            localStorage.setItem(CACHE_TIME, Date.now().toString());
-        } catch (e) {
-            console.warn("Cache voll:", e);
-            setMapStatus('Cache voll – lösche LocalStorage manuell!', 'error');
-        }
-    }
-
-    function getCache(key) {
-        return localStorage.getItem(key);
-    }
-
-    async function fetchWithCache(origUrl, cacheKey) {
-        const cached = getCache(cacheKey);
-        if (cached) {
-            setMapStatus('Karte aus Cache...');
-            return cached;
-        }
-        const timedUrl = origUrl + '?t=' + Date.now();
-        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(timedUrl);
-        setMapStatus('Lade Karte via Proxy...');
-        try {
-            const res = await fetch(proxyUrl);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const text = await res.text();
-            saveCache(cacheKey, text);
-            setMapStatus('Karte geladen & gecacht!');
-            return text;
-        } catch (err) {
-            throw new Error(`Proxy-Fehler: ${err.message}`);
-        }
-    }
-
-    window.forceReloadMap = async function() {
-        localStorage.removeItem(CACHE_VILLAGE);
-        localStorage.removeItem(CACHE_PLAYER);
-        localStorage.removeItem(CACHE_TIME);
-        setMapStatus('Cache gelöscht – lade neu...');
-        await loadMapData();
-    };
-
-    async function loadMapData() {
-        try {
-            const [villageText, playerText] = await Promise.all([
-                fetchWithCache(VILLAGE_ORIG, CACHE_VILLAGE),
-                fetchWithCache(PLAYER_ORIG, CACHE_PLAYER)
+            const timedVillage = VILLAGE_ORIG + '?t=' + Date.now();
+            const timedPlayer = PLAYER_ORIG + '?t=' + Date.now();
+            const [villageRes, playerRes] = await Promise.all([
+                fetch('https://corsproxy.io/?' + encodeURIComponent(timedVillage)),
+                fetch('https://corsproxy.io/?' + encodeURIComponent(timedPlayer))
             ]);
+            if (!villageRes.ok || !playerRes.ok) throw new Error(`HTTP ${villageRes.status || playerRes.status}`);
+            const [villageText, playerText] = await Promise.all([villageRes.text(), playerRes.text()]);
 
-            // Parse players (auch wenn nicht verwendet – für Erweiterung)
+            // Parse players
             playerText.split('\n').forEach(line => {
                 if (line.trim()) {
                     const [id, name, ...rest] = line.split(',');
@@ -113,25 +74,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             mapLoaded = true;
-            setMapStatus(`Karte geladen: ${villageMap.size} Dörfer.`);
-            updateCacheInfo();
+            setMapStatus(`Karte aktualisiert: ${villageMap.size} Dörfer (Stand: ${new Date().toLocaleString('de-DE')}).`, 'success');
         } catch(e) {
             mapLoaded = false;
-            setMapStatus(`Fehler beim Laden: ${e.message}`, 'error');
-            reloadMapBtn.style.display = 'inline-block';
+            setMapStatus(`Fehler beim Laden: ${e.message}. Versuche Proxy oder später.`, 'error');
         }
     }
 
+    window.forceReloadMap = async () => await loadMapData(true);
+
+    // Auto-Load bei jedem Aufruf/Reload
     await loadMapData();
+
     reloadMapBtn.addEventListener('click', forceReloadMap);
 
     function saveProfiles() {
         localStorage.setItem(storageKey, JSON.stringify(profiles));
-    }
-
-    function parseTime(timeStr) {
-        const [h, m, s] = timeStr.split(':').map(Number);
-        return (h * 3600 + m * 60 + s) * 1000;
     }
 
     function msToHHMMSS(ms) {
@@ -147,13 +105,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function calculateStartTime(arrivalDate, runtimeMs) {
-        const startDate = new Date(arrivalDate.getTime() - runtimeMs);
-        return startDate;
+        return new Date(arrivalDate.getTime() - runtimeMs);
+    }
+
+    function parseArrivalTime(timeStr) {
+        // Flexibler Parser: YYYY-MM-DD HH:MM(:SS) -> Date
+        const match = timeStr.match(/(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})(?::(\d{2}))?/);
+        if (!match) return null;
+        const [, datePart, timePart, secPart] = match;
+        const fullTime = `${datePart}T${timePart}${secPart ? ':' + secPart : ':00'}`;
+        const date = new Date(fullTime);
+        if (isNaN(date.getTime()) || date < new Date()) {
+            return null; // Vergangene Zeiten ungültig
+        }
+        return date;
     }
 
     async function loadVillage(profileIndex, isTarget, vIndex = null) {
         if (!mapLoaded) {
-            alert('Karte wird geladen... Warte oder klicke "Karte neu laden".');
+            alert('Karte lädt... Warte oder klicke "Karte neu laden".');
             return;
         }
         const inputId = isTarget ? `targetId-${profileIndex}` : `villageInput-${profileIndex}-${vIndex}`;
@@ -175,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             } else if (matches.length > 1) {
                 const names = matches.slice(0,3).map(v => v.name).join(', ');
-                alert(`Mehrere Dörfer gefunden: ${names}. Verwende ID für Genauigkeit.`);
+                alert(`Mehrere Dörfer: ${names}. Verwende ID.`);
                 return;
             } else {
                 village = matches[0];
@@ -210,6 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         tabPane.id = tabId;
         tabPane.role = 'tabpanel';
 
+        const defaultTime = profile.arrivalTime || getCurrentDateTime(); // Auto-aktuell
         const form = document.createElement('div');
         form.innerHTML = `
             <div class="mb-3">
@@ -217,8 +188,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <input type="text" class="form-control" id="profileName-${profileIndex}" value="${profile.name || 'Profil ' + (profileIndex + 1)}">
             </div>
             <div class="mb-3">
-                <label for="arrivalTime-${profileIndex}" class="form-label">Gewünschte Ankunftszeit (YYYY-MM-DD HH:MM:SS)</label>
-                <input type="text" class="form-control" id="arrivalTime-${profileIndex}" value="${profile.arrivalTime || ''}" placeholder="z.B. 2025-11-17 12:24:04">
+                <label for="arrivalTime-${profileIndex}" class="form-label">Gewünschte Ankunftszeit</label>
+                <input type="datetime-local" class="form-control" id="arrivalTime-${profileIndex}" value="${defaultTime.replace(/:\d{2}$/, '')}" step="1"> <!-- Picker, SS=00 -->
+                <small class="form-text">Klicke für Kalender/Uhrzeit. Format: YYYY-MM-DDTHH:MM (Sekunden auto=00).</small>
             </div>
             <div class="mb-3">
                 <label for="targetId-${profileIndex}" class="form-label">Ziel-Dorf (ID, Name oder x|y)</label>
@@ -226,7 +198,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <input type="text" class="form-control" id="targetId-${profileIndex}" value="${profile.targetId || ''}" placeholder="z.B. 12345 oder Dorf Name oder 500|600">
                     <button class="btn btn-info" id="loadTarget-${profileIndex}"><i class="bi bi-download"></i> Laden</button>
                 </div>
-                <small id="targetDisplay-${profileIndex}" class="form-text">${profile.target ? `${profile.target.name} @ ${profile.target.x}|${profile.target.y}` : 'Nicht geladen'}</small>
+                <small id="targetDisplay-${profileIndex}" class="form-text">${profile.target ? `<strong>${profile.target.name} @ ${profile.target.x}|${profile.target.y}</strong>` : 'Nicht geladen'}</small>
             </div>
             <div class="mb-3">
                 <label for="speed-${profileIndex}" class="form-label">Nobler-Geschwindigkeit (Minuten pro Feld)</label>
@@ -262,8 +234,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             saveProfiles();
         });
 
-        form.querySelector(`#arrivalTime-${profileIndex}`).addEventListener('input', (e) => {
-            profile.arrivalTime = e.target.value;
+        const arrivalInput = form.querySelector(`#arrivalTime-${profileIndex}`);
+        arrivalInput.addEventListener('change', (e) => {
+            let val = e.target.value;
+            if (val) {
+                val = val.replace('T', ' ') + ':00'; // Zu vollem Format
+                profile.arrivalTime = val;
+            }
             saveProfiles();
         });
 
@@ -336,24 +313,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         if (!profile.target || !profile.target.x || !profile.target.y) {
-            resultsDiv.innerHTML = '<div class="alert alert-warning">Ziel-Dorf nicht geladen! Lade es zuerst.</div>';
+            resultsDiv.innerHTML = '<div class="alert alert-warning">Ziel-Dorf nicht geladen!</div>';
             return;
         }
 
         const speed = profile.speed || 35;
         const arrivalStr = profile.arrivalTime;
-        if (!arrivalStr.match(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/)) {
-            resultsDiv.innerHTML = '<div class="alert alert-danger">Ungültiges Ankunftszeit-Format! Verwende YYYY-MM-DD HH:MM:SS.</div>';
-            return;
-        }
-
-        const arrivalDate = new Date(arrivalStr.replace(' ', 'T') + ':00'); // Assume local time
-        if (isNaN(arrivalDate)) {
-            resultsDiv.innerHTML = '<div class="alert alert-danger">Ungültige Ankunftszeit!</div>';
+        const arrivalDate = parseArrivalTime(arrivalStr);
+        if (!arrivalDate) {
+            resultsDiv.innerHTML = `<div class="alert alert-danger">Ungültige Ankunftszeit! Verwende z.B. ${getCurrentDateTime()}. (Muss zukünftig sein)</div>`;
             return;
         }
 
         let table = '<table class="table table-dark"><thead><tr><th>Dorf</th><th>Koordinaten</th><th>Entfernung</th><th>Laufzeit</th><th>Startzeit</th></tr></thead><tbody>';
+        let validVillages = 0;
         profile.villages.forEach(village => {
             if (!village.x || !village.y) {
                 table += `<tr class="table-warning"><td>${village.name || 'Unbenannt'}</td><td>-</td><td>-</td><td>Dorf nicht geladen!</td><td>-</td></tr>`;
@@ -367,9 +340,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const startDate = calculateStartTime(arrivalDate, runtimeMs);
             const startStr = formatDateTime(startDate);
             table += `<tr><td>${village.name || 'Unbenannt'}</td><td>${village.x}|${village.y}</td><td>${dist.toFixed(1)}</td><td>${runtimeStr}</td><td>${startStr}</td></tr>`;
+            validVillages++;
         });
         table += '</tbody></table>';
-        resultsDiv.innerHTML = table;
+        resultsDiv.innerHTML = validVillages > 0 ? table : '<div class="alert alert-info">Keine gültigen Dörfer zum Berechnen.</div>';
     }
 
     function renderOverviewTab() {
@@ -391,15 +365,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!overviewResults) return;
 
         if (!mapLoaded) {
-            overviewResults.innerHTML = '<p>Karte nicht geladen – Übersicht unvollständig.</p>';
+            overviewResults.innerHTML = '<p>Karte nicht geladen.</p>';
             return;
         }
 
         let allAttacks = [];
         profiles.forEach((profile, pIndex) => {
             if (!profile.target || !profile.target.x || !profile.target.y) return;
-            const arrivalDate = new Date(profile.arrivalTime.replace(' ', 'T') + ':00');
-            if (isNaN(arrivalDate)) return;
+            const arrivalDate = parseArrivalTime(profile.arrivalTime);
+            if (!arrivalDate) return;
             const speed = profile.speed || 35;
             profile.villages.forEach(village => {
                 if (!village.x || !village.y) return;
@@ -428,7 +402,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             table += `<tr><td>${attack.profile}</td><td>${attack.village}</td><td>${attack.coords}</td><td>${attack.runtimeStr}</td><td>${attack.startTimeStr}</td><td>${attack.arrival}</td></tr>`;
         });
         table += '</tbody></table>';
-        overviewResults.innerHTML = allAttacks.length ? table : '<p>Keine gültigen Angriffe vorhanden.</p>';
+        overviewResults.innerHTML = allAttacks.length ? table : '<p>Keine gültigen Angriffe.</p>';
     }
 
     function updateTabNames() {
@@ -462,7 +436,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             profileTabContent.appendChild(tabPane);
         });
 
-        // Übersicht-Tab
         const overviewTab = document.createElement('li');
         overviewTab.className = 'nav-item';
         overviewTab.id = 'overviewTab';
@@ -484,7 +457,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     addProfileBtn.addEventListener('click', () => {
-        profiles.push({ name: '', arrivalTime: '', targetId: '', target: null, speed: 35, villages: [] });
+        profiles.push({ name: '', arrivalTime: getCurrentDateTime(), targetId: '', target: null, speed: 35, villages: [] });
         saveProfiles();
         renderTabs();
         const newIndex = profiles.length - 1;
@@ -493,11 +466,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (profiles.length === 0) {
-        profiles.push({ name: '', arrivalTime: '', targetId: '', target: null, speed: 35, villages: [] });
+        profiles.push({ name: '', arrivalTime: getCurrentDateTime(), targetId: '', target: null, speed: 35, villages: [] });
         saveProfiles();
     }
 
     renderTabs();
-    window.loadVillage = loadVillage; // Global for onclick
+    window.loadVillage = loadVillage;
     window.deleteVillage = deleteVillage;
 });
