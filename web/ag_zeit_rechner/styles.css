@@ -1,31 +1,159 @@
 body {
-    background-color: #212529;
-    color: #f8f9fa;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%); /* Dunkles mit Lila-Touch */
+    color: #e0e0e0;
+    font-family: 'Segoe UI', sans-serif;
 }
 .nav-tabs .nav-link {
-    color: #f8f9fa;
-    background-color: #343a40;
-    border-color: #495057;
+    color: #e0e0e0;
+    background-color: #2a2a3a; /* Weiches Dunkel */
+    border-color: #A100A1; /* Lila Border */
+    transition: all 0.3s;
+}
+.nav-tabs .nav-link:hover {
+    background-color: #FF6B35; /* Orange Hover */
+    color: #000;
+    border-color: #FF6B35;
 }
 .nav-tabs .nav-link.active {
-    background-color: #495057;
-    border-color: #495057 #495057 #212529;
+    background: linear-gradient(145deg, #A100A1, #8B5A7E); /* Lila-Gradient */
+    border-color: #A100A1 #A100A1 #1a1a2e;
+    color: #fff;
+    box-shadow: 0 2px 10px rgba(161, 0, 161, 0.3);
 }
 .card {
-    background-color: #343a40;
-    border: 1px solid #495057;
+    background: linear-gradient(145deg, #2a2a3a, #1e1e2e); /* Dunkles Gradient */
+    border: 1px solid #A100A1; /* Lila Border */
+    box-shadow: 0 4px 15px rgba(161, 0, 161, 0.2);
 }
 .table {
-    color: #f8f9fa;
+    color: #e0e0e0;
+    background: #2a2a3a;
+    border-radius: 8px;
+    overflow: hidden;
 }
 .table thead th {
-    background-color: #495057;
+    background: linear-gradient(145deg, #FF6B35, #FF8C00); /* Orange-Gradient */
+    color: #000;
+    font-weight: bold;
+    border: none;
+    box-shadow: 0 2px 5px rgba(255, 107, 53, 0.3);
+}
+.table tbody tr {
+    transition: background 0.3s;
+}
+.table tbody tr:hover {
+    background: rgba(161, 0, 161, 0.1); /* Lila-Hover */
+}
+.table tbody tr.table-warning {
+    background: rgba(255, 107, 53, 0.2); /* Orange-Warnung */
 }
 .alert {
-    background-color: #dc3545;
-    color: #f8f9fa;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+.alert-success {
+    background: linear-gradient(145deg, #28a745, #20c997); /* Grün mit Orange-Touch */
+    color: #fff;
+}
+.alert-warning {
+    background: linear-gradient(145deg, #FF6B35, #FF8C00); /* Orange */
+    color: #000;
+}
+.alert-danger {
+    background: linear-gradient(145deg, #dc3545, #A100A1); /* Rot-Lila */
+    color: #fff;
+}
+.alert-info {
+    background: linear-gradient(145deg, #A100A1, #8B5A7E); /* Lila */
+    color: #fff;
+}
+.btn-primary {
+    background: linear-gradient(145deg, #A100A1, #8B5A7E); /* Lila */
+    border: none;
+    color: #fff;
+    transition: all 0.3s;
+}
+.btn-primary:hover {
+    background: linear-gradient(145deg, #8B5A7E, #A100A1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(161, 0, 161, 0.4);
+}
+.btn-success {
+    background: linear-gradient(145deg, #28a745, #FF6B35); /* Grün-Orange */
+    border: none;
+    color: #fff;
+}
+.btn-success:hover {
+    background: linear-gradient(145deg, #FF6B35, #28a745);
+    transform: translateY(-1px);
+}
+.btn-warning {
+    background: linear-gradient(145deg, #FF6B35, #FF8C00); /* Orange */
+    border: none;
+    color: #000;
+}
+.btn-warning:hover {
+    background: linear-gradient(145deg, #FF8C00, #FF6B35);
+    transform: translateY(-1px);
+}
+.btn-secondary {
+    background: #2a2a3a;
+    border: 1px solid #A100A1;
+    color: #e0e0e0;
+}
+.btn-secondary:hover {
+    background: #A100A1;
+    color: #fff;
+}
+.btn-danger {
+    background: linear-gradient(145deg, #dc3545, #A100A1); /* Rot-Lila */
+    border: none;
+    color: #fff;
+}
+.btn-danger:hover {
+    background: linear-gradient(145deg, #A100A1, #dc3545);
+    transform: translateY(-1px);
+}
+.btn-info {
+    background: linear-gradient(145deg, #17a2b8, #A100A1); /* Blau-Lila */
+    border: none;
+    color: #fff;
+}
+.btn-info:hover {
+    background: linear-gradient(145deg, #A100A1, #17a2b8);
+}
+.btn-outline-danger {
+    border-color: #dc3545;
+    color: #dc3545;
+}
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: #fff;
+}
+.form-control, .form-control:focus {
+    background: #2a2a3a;
+    border: 1px solid #A100A1;
+    color: #e0e0e0;
+}
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(161, 0, 161, 0.25); /* Lila-Focus */
 }
 #mapStatus .cache-info {
     font-size: 0.9em;
-    color: #adb5bd;
+    color: #FF6B35; /* Orange-Akzent */
+    background: rgba(255, 107, 53, 0.1);
+    padding: 5px;
+    border-radius: 4px;
+}
+.input-group .btn {
+    border: 1px solid #A100A1;
+}
+@media (max-width: 768px) {
+    .row > div {
+        margin-bottom: 10px;
+    }
+    .table {
+        font-size: 0.9em;
+    }
 }
