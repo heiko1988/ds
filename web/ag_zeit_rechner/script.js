@@ -43,12 +43,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!villageRes.ok || !playerRes.ok) throw new Error(`HTTP ${villageRes.status || playerRes.status}`);
             const [villageText, playerText] = await Promise.all([villageRes.text(), playerRes.text()]);
 
-            // Parse players
+            // Parse players – ID als String
             playerText.split('\n').forEach(line => {
                 if (line.trim()) {
-                    const [id, name, ...rest] = line.split(',');
-                    const decodedName = decodeURIComponent(name.replace(/\+/g, '%20'));
-                    playerMap.set(id, decodedName);
+                    const parts = line.split(',');
+                    if (parts.length >= 2) {
+                        const id = String(parts[0].trim()); // Explizit String
+                        const encodedName = parts[1].trim();
+                        const decodedName = decodeURIComponent(encodedName.replace(/\+/g, '%20').replace(/%27/g, "'"));
+                        playerMap.set(id, decodedName);
+                    }
                 }
             });
 
@@ -56,25 +60,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             villageText.split('\n').forEach(line => {
                 if (line.trim()) {
                     const parts = line.split(',');
-                    const id = parts[0];
-                    let encodedName = parts[1];
-                    const x = parseInt(parts[2]);
-                    const y = parseInt(parts[3]);
-                    const playerId = parts[4];
-                    encodedName = encodedName.replace(/\+/g, '%20');
-                    const name = decodeURIComponent(encodedName);
-                    const village = {id, name, x, y, playerId};
-                    villageMap.set(id, village);
-                    const lcName = name.toLowerCase();
-                    if (!villagesByName.has(lcName)) {
-                        villagesByName.set(lcName, []);
+                    if (parts.length >= 5) {
+                        const id = parts[0].trim();
+                        let encodedName = parts[1].trim();
+                        const x = parseInt(parts[2].trim());
+                        const y = parseInt(parts[3].trim());
+                        const playerId = String(parts[4].trim()); // Explizit String
+                        encodedName = encodedName.replace(/\+/g, '%20');
+                        const name = decodeURIComponent(encodedName);
+                        const village = {id, name, x, y, playerId};
+                        villageMap.set(id, village);
+                        const lcName = name.toLowerCase();
+                        if (!villagesByName.has(lcName)) {
+                            villagesByName.set(lcName, []);
+                        }
+                        villagesByName.get(lcName).push(village);
                     }
-                    villagesByName.get(lcName).push(village);
                 }
             });
 
             mapLoaded = true;
-            setMapStatus(`Karte aktualisiert: ${villageMap.size} Dörfer (Stand: ${new Date().toLocaleString('de-DE')}).`, 'success');
+            setMapStatus(`Karte aktualisiert: ${villageMap.size} Dörfer, ${playerMap.size} Spieler (Stand: ${new Date().toLocaleString('de-DE')}).`, 'success');
         } catch(e) {
             mapLoaded = false;
             setMapStatus(`Fehler beim Laden: ${e.message}. Versuche Proxy oder später.`, 'error');
@@ -155,7 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Dorf nicht gefunden.');
             return;
         }
-        const playerName = village.playerId ? (playerMap.get(village.playerId) || 'Unbekannt') : 'Unbekannt';
+        // Spielername lookup – mit String-Cast & Debug
+        const playerIdStr = String(village.playerId || '');
+        const playerName = playerIdStr && playerMap.has(playerIdStr) ? playerMap.get(playerIdStr) : 'Unbekannt (keine ID)';
+        console.log(`Player lookup: ID "${playerIdStr}" -> Name "${playerName}"`); // Debug: Check Console
         village.playerName = playerName;
         const profile = profiles[profileIndex];
         if (isTarget) {
