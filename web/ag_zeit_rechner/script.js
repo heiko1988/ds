@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const profileTabs = document.getElementById('profileTabs');
     const profileTabContent = document.getElementById('profileTabContent');
     const addProfileBtn = document.getElementById('addProfileBtn');
+    const mapStatus = document.getElementById('mapStatus');
+    const reloadMapBtn = document.getElementById('reloadMapBtn');
 
     // Map data
     let playerMap = new Map();
@@ -11,16 +13,76 @@ document.addEventListener('DOMContentLoaded', async () => {
     let villagesByName = new Map();
     let mapLoaded = false;
 
+    // Cache Keys (wie in deinem Scanner)
+    const CACHE_VILLAGE = 'nobling_village_dep20';
+    const CACHE_PLAYER = 'nobling_player_dep20';
+    const CACHE_TIME = 'nobling_cache_time_dep20';
+    const VILLAGE_ORIG = 'https://dep20.die-staemme.de/map/village.txt';
+    const PLAYER_ORIG = 'https://dep20.die-staemme.de/map/player.txt';
+
+    function setMapStatus(msg, type = 'loading') {
+        mapStatus.innerHTML = `<div class="alert alert-${type === 'error' ? 'danger' : type === 'success' ? 'success' : 'info'}">${msg}</div>`;
+    }
+
+    function updateCacheInfo() {
+        const time = localStorage.getItem(CACHE_TIME);
+        if (time) {
+            const date = new Date(parseInt(time));
+            mapStatus.innerHTML += `<small class="cache-info">Cache: ${date.toLocaleString()} | <button class="btn btn-sm btn-outline-warning" onclick="forceReloadMap()">Neu laden</button></small>`;
+        }
+    }
+
+    function saveCache(key, data) {
+        try {
+            localStorage.setItem(key, data);
+            localStorage.setItem(CACHE_TIME, Date.now().toString());
+        } catch (e) {
+            console.warn("Cache voll:", e);
+            setMapStatus('Cache voll – lösche LocalStorage manuell!', 'error');
+        }
+    }
+
+    function getCache(key) {
+        return localStorage.getItem(key);
+    }
+
+    async function fetchWithCache(origUrl, cacheKey) {
+        const cached = getCache(cacheKey);
+        if (cached) {
+            setMapStatus('Karte aus Cache...');
+            return cached;
+        }
+        const timedUrl = origUrl + '?t=' + Date.now();
+        const proxyUrl = 'https://corsproxy.io/?' + encodeURIComponent(timedUrl);
+        setMapStatus('Lade Karte via Proxy...');
+        try {
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const text = await res.text();
+            saveCache(cacheKey, text);
+            setMapStatus('Karte geladen & gecacht!');
+            return text;
+        } catch (err) {
+            throw new Error(`Proxy-Fehler: ${err.message}`);
+        }
+    }
+
+    window.forceReloadMap = async function() {
+        localStorage.removeItem(CACHE_VILLAGE);
+        localStorage.removeItem(CACHE_PLAYER);
+        localStorage.removeItem(CACHE_TIME);
+        setMapStatus('Cache gelöscht – lade neu...');
+        await loadMapData();
+    };
+
     async function loadMapData() {
         try {
-            const [playerRes, villageRes] = await Promise.all([
-                fetch('https://dep20.die-staemme.de/map/player.txt'),
-                fetch('https://dep20.die-staemme.de/map/village.txt')
+            const [villageText, playerText] = await Promise.all([
+                fetchWithCache(VILLAGE_ORIG, CACHE_VILLAGE),
+                fetchWithCache(PLAYER_ORIG, CACHE_PLAYER)
             ]);
-            const playerText = await playerRes.text();
-            const villageText = await villageRes.text();
 
-            // Parse players
+            // Parse players (auch wenn nicht verwendet – für Erweiterung)
             playerText.split('\n').forEach(line => {
                 if (line.trim()) {
                     const [id, name, ...rest] = line.split(',');
@@ -51,13 +113,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
 
             mapLoaded = true;
-            document.getElementById('mapStatus').innerHTML = `<div class="alert alert-success">Karte geladen: ${villageMap.size} Dörfer.</div>`;
+            setMapStatus(`Karte geladen: ${villageMap.size} Dörfer.`);
+            updateCacheInfo();
         } catch(e) {
-            document.getElementById('mapStatus').innerHTML = `<div class="alert alert-danger">Fehler beim Laden der Karte: ${e.message}</div>`;
+            mapLoaded = false;
+            setMapStatus(`Fehler beim Laden: ${e.message}`, 'error');
+            reloadMapBtn.style.display = 'inline-block';
         }
     }
 
     await loadMapData();
+    reloadMapBtn.addEventListener('click', forceReloadMap);
 
     function saveProfiles() {
         localStorage.setItem(storageKey, JSON.stringify(profiles));
@@ -87,7 +153,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function loadVillage(profileIndex, isTarget, vIndex = null) {
         if (!mapLoaded) {
-            alert('Karte wird geladen...');
+            alert('Karte wird geladen... Warte oder klicke "Karte neu laden".');
             return;
         }
         const inputId = isTarget ? `targetId-${profileIndex}` : `villageInput-${profileIndex}-${vIndex}`;
@@ -264,6 +330,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const resultsDiv = document.querySelector(`#results-${profileIndex}`);
         resultsDiv.innerHTML = '';
 
+        if (!mapLoaded) {
+            resultsDiv.innerHTML = '<div class="alert alert-warning">Karte nicht geladen! Klicke "Karte neu laden".</div>';
+            return;
+        }
+
         if (!profile.target || !profile.target.x || !profile.target.y) {
             resultsDiv.innerHTML = '<div class="alert alert-warning">Ziel-Dorf nicht geladen! Lade es zuerst.</div>';
             return;
@@ -318,6 +389,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updateOverview() {
         const overviewResults = document.querySelector('#overviewResults');
         if (!overviewResults) return;
+
+        if (!mapLoaded) {
+            overviewResults.innerHTML = '<p>Karte nicht geladen – Übersicht unvollständig.</p>';
+            return;
+        }
 
         let allAttacks = [];
         profiles.forEach((profile, pIndex) => {

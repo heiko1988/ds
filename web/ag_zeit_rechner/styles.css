@@ -25,3 +25,7 @@ body {
     background-color: #dc3545;
     color: #f8f9fa;
 }
+#mapStatus .cache-info {
+    font-size: 0.9em;
+    color: #adb5bd;
+}
