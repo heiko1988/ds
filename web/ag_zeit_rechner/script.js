@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let playerMap = new Map();
     let villageMap = new Map();
     let villagesByName = new Map();
+    let villagesByCoords = new Map(); // Neu: Für Koords-Suche
     let mapLoaded = false;
 
     // URLs (kein Cache für immer aktuelle Daten – immer neu fetchen bei Load/Reload)
@@ -44,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const [villageText, playerText] = await Promise.all([villageRes.text(), playerRes.text()]);
 
             // Parse players – ID als String
+            playerMap.clear();
             playerText.split('\n').forEach(line => {
                 if (line.trim()) {
                     const parts = line.split(',');
@@ -56,7 +58,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
 
-            // Parse villages
+            // Parse villages – mit Koords-Map
+            villageMap.clear();
+            villagesByName.clear();
+            villagesByCoords.clear();
             villageText.split('\n').forEach(line => {
                 if (line.trim()) {
                     const parts = line.split(',');
@@ -70,6 +75,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const name = decodeURIComponent(encodedName);
                         const village = {id, name, x, y, playerId};
                         villageMap.set(id, village);
+                        const coordsKey = `${x}|${y}`;
+                        villagesByCoords.set(coordsKey, village); // Neu: Koords-Index
                         const lcName = name.toLowerCase();
                         if (!villagesByName.has(lcName)) {
                             villagesByName.set(lcName, []);
@@ -140,9 +147,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (/^\d+$/.test(query)) {
             village = villageMap.get(query);
         } else if (/^(\d+)\|(\d+)$/.test(query)) {
-            const [, xStr, yStr] = query.match(/^(\d+)\|(\d+)$/);
-            const x = parseInt(xStr), y = parseInt(yStr);
-            village = { name: `${x}|${y}`, x, y, id: null, playerId: null };
+            const coordsKey = query;
+            village = villagesByCoords.get(coordsKey);
+            if (!village) {
+                alert(`Koordinaten ${query} nicht gefunden.`);
+                return;
+            }
         } else {
             const lcQuery = query.toLowerCase();
             const matches = villagesByName.get(lcQuery) || [];
@@ -161,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Dorf nicht gefunden.');
             return;
         }
-        // Spielername lookup – mit String-Cast & Debug
+        // Spielername lookup – mit String-Cast
         const playerIdStr = String(village.playerId || '');
         const playerName = playerIdStr && playerMap.has(playerIdStr) ? playerMap.get(playerIdStr) : 'Unbekannt (keine ID)';
         console.log(`Player lookup: ID "${playerIdStr}" -> Name "${playerName}"`); // Debug: Check Console
