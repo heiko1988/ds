@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (/^(\d+)\|(\d+)$/.test(query)) {
             const [, xStr, yStr] = query.match(/^(\d+)\|(\d+)$/);
             const x = parseInt(xStr), y = parseInt(yStr);
-            village = { name: `${x}|${y}`, x, y, id: null };
+            village = { name: `${x}|${y}`, x, y, id: null, playerId: null };
         } else {
             const lcQuery = query.toLowerCase();
             const matches = villagesByName.get(lcQuery) || [];
@@ -155,19 +155,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Dorf nicht gefunden.');
             return;
         }
+        const playerName = village.playerId ? (playerMap.get(village.playerId) || 'Unbekannt') : 'Unbekannt';
+        village.playerName = playerName;
         const profile = profiles[profileIndex];
         if (isTarget) {
             profile.target = village;
             profile.targetId = query;
-            document.getElementById(`targetDisplay-${profileIndex}`).innerHTML = `<strong>${village.name} @ ${village.x}|${village.y}</strong>`;
+            document.getElementById(`targetDisplay-${profileIndex}`).innerHTML = `<strong>${village.name} von ${playerName} @ ${village.x}|${village.y}</strong>`;
         } else {
             profile.villages[vIndex].name = village.name;
+            profile.villages[vIndex].playerName = playerName;
             profile.villages[vIndex].x = village.x;
             profile.villages[vIndex].y = village.y;
             profile.villages[vIndex].id = village.id;
             profile.villages[vIndex].identifier = query;
             const display = document.querySelector(`#villageDisplay-${profileIndex}-${vIndex}`);
-            display.innerHTML = `<strong>${village.name} @ ${village.x}|${village.y}</strong>`;
+            display.innerHTML = `<strong>${village.name} von ${playerName} @ ${village.x}|${village.y}</strong>`;
         }
         saveProfiles();
     }
@@ -198,7 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <input type="text" class="form-control" id="targetId-${profileIndex}" value="${profile.targetId || ''}" placeholder="z.B. 12345 oder Dorf Name oder 500|600">
                     <button class="btn btn-info" id="loadTarget-${profileIndex}"><i class="bi bi-download"></i> Laden</button>
                 </div>
-                <small id="targetDisplay-${profileIndex}" class="form-text">${profile.target ? `<strong>${profile.target.name} @ ${profile.target.x}|${profile.target.y}</strong>` : 'Nicht geladen'}</small>
+                <small id="targetDisplay-${profileIndex}" class="form-text">${profile.target ? `<strong>${profile.target.name} von ${profile.target.playerName} @ ${profile.target.x}|${profile.target.y}</strong>` : 'Nicht geladen'}</small>
             </div>
             <div class="mb-3">
                 <label for="speed-${profileIndex}" class="form-label">Nobler-Geschwindigkeit (Minuten pro Feld)</label>
@@ -220,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         form.querySelector(`#addVillage-${profileIndex}`).addEventListener('click', () => {
             profile.villages = profile.villages || [];
-            profile.villages.push({identifier: '', name: '', x: null, y: null, id: null});
+            profile.villages.push({identifier: '', name: '', playerName: '', x: null, y: null, id: null});
             renderVillageInput(profileIndex, profile.villages.length - 1, villagesContainer);
             saveProfiles();
         });
@@ -272,7 +275,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <button class="btn btn-info btn-sm w-100" onclick="loadVillage(${profileIndex}, false, ${vIndex})"><i class="bi bi-download"></i> Laden</button>
             </div>
             <div class="col-4">
-                <small id="villageDisplay-${profileIndex}-${vIndex}" class="form-text">${village.name ? `<strong>${village.name} @ ${village.x}|${village.y}</strong>` : 'Nicht geladen'}</small>
+                <small id="villageDisplay-${profileIndex}-${vIndex}" class="form-text">${village.name ? `<strong>${village.name} von ${village.playerName} @ ${village.x}|${village.y}</strong>` : 'Nicht geladen'}</small>
             </div>
             <div class="col-2">
                 <button class="btn btn-outline-danger btn-sm w-100" onclick="deleteVillage(${profileIndex}, ${vIndex})"><i class="bi bi-trash"></i></button>
@@ -325,11 +328,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        let table = '<table class="table table-dark"><thead><tr><th>Dorf</th><th>Koordinaten</th><th>Entfernung</th><th>Laufzeit</th><th>Startzeit</th></tr></thead><tbody>';
+        let table = '<table class="table table-dark"><thead><tr><th>Dorf</th><th>Spieler</th><th>Koordinaten</th><th>Entfernung</th><th>Laufzeit</th><th>Startzeit</th></tr></thead><tbody>';
         let validVillages = 0;
         profile.villages.forEach(village => {
             if (!village.x || !village.y) {
-                table += `<tr class="table-warning"><td>${village.name || 'Unbenannt'}</td><td>-</td><td>-</td><td>Dorf nicht geladen!</td><td>-</td></tr>`;
+                table += `<tr class="table-warning"><td>${village.name || 'Unbenannt'}</td><td>-</td><td>-</td><td>-</td><td>Dorf nicht geladen!</td><td>-</td></tr>`;
                 return;
             }
             const dx = village.x - profile.target.x;
@@ -339,7 +342,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const runtimeStr = msToHHMMSS(runtimeMs);
             const startDate = calculateStartTime(arrivalDate, runtimeMs);
             const startStr = formatDateTime(startDate);
-            table += `<tr><td>${village.name || 'Unbenannt'}</td><td>${village.x}|${village.y}</td><td>${dist.toFixed(1)}</td><td>${runtimeStr}</td><td>${startStr}</td></tr>`;
+            table += `<tr><td>${village.name || 'Unbenannt'}</td><td>${village.playerName || 'Unbekannt'}</td><td>${village.x}|${village.y}</td><td>${dist.toFixed(1)}</td><td>${runtimeStr}</td><td>${startStr}</td></tr>`;
             validVillages++;
         });
         table += '</tbody></table>';
@@ -386,7 +389,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 allAttacks.push({
                     profile: profile.name || `Profil ${pIndex + 1}`,
                     village: village.name || 'Unbenannt',
+                    playerName: village.playerName || 'Unbekannt',
                     coords: `${village.x}|${village.y}`,
+                    dist: dist.toFixed(1),
                     runtimeStr,
                     startTime: startDate,
                     startTimeStr: formatDateTime(startDate),
@@ -397,9 +402,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         allAttacks.sort((a, b) => a.startTime - b.startTime);
 
-        let table = '<table class="table table-dark"><thead><tr><th>Profil</th><th>Dorf</th><th>Koords</th><th>Laufzeit</th><th>Startzeit</th><th>Ankunft</th></tr></thead><tbody>';
+        let table = '<table class="table table-dark"><thead><tr><th>Profil</th><th>Dorf</th><th>Spieler</th><th>Koords</th><th>Entfernung</th><th>Laufzeit</th><th>Startzeit</th><th>Ankunft</th></tr></thead><tbody>';
         allAttacks.forEach(attack => {
-            table += `<tr><td>${attack.profile}</td><td>${attack.village}</td><td>${attack.coords}</td><td>${attack.runtimeStr}</td><td>${attack.startTimeStr}</td><td>${attack.arrival}</td></tr>`;
+            table += `<tr><td>${attack.profile}</td><td>${attack.village}</td><td>${attack.playerName}</td><td>${attack.coords}</td><td>${attack.dist}</td><td>${attack.runtimeStr}</td><td>${attack.startTimeStr}</td><td>${attack.arrival}</td></tr>`;
         });
         table += '</tbody></table>';
         overviewResults.innerHTML = allAttacks.length ? table : '<p>Keine gültigen Angriffe.</p>';
