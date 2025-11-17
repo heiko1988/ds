@@ -1,149 +1,32 @@
 body {
-    background-color: #212529;
-    color: #f8f9fa; /* Hell für Kontrast */
-    font-family: 'Segoe UI', sans-serif;
+    background: #121212;
+    color: #e0e0e0;
 }
-.nav-tabs .nav-link {
-    color: #f8f9fa; /* Hell */
-    background-color: #343a40;
-    border-color: #495057;
+
+/* Besser lesbare Hilfstexte */
+.form-text, small {
+    color: #000 !important;
+    font-weight: 500;
 }
-.nav-tabs .nav-link.active {
-    background-color: #495057;
-    border-color: #495057 #495057 #212529;
-    color: #f8f9fa; /* Hell */
+
+/* Ziel-Spalten rot, Angriffs-Spalten grün */
+th.target-col {
+    background-color: #440000 !important;
+    color: #ff4444 !important;
 }
-.card {
-    background-color: #343a40;
-    border: 1px solid #495057;
-    color: #f8f9fa; /* Hell */
+th.attack-col {
+    background-color: #003300 !important;
+    color: #44ff44 !important;
 }
-.table {
-    color: #f8f9fa; /* Hell für alle Zellen */
-    background-color: #343a40;
+
+/* Tabellen allgemein */
+.table-dark th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
-.table thead th {
-    background-color: #495057;
-    color: #f8f9fa; /* Hell */
-    border-color: #6c757d;
-    cursor: pointer; /* Für Sortier-Hand */
-}
-.table thead th:hover {
-    background-color: #6c757d; /* Leichter Hover */
-}
-.table tbody tr {
-    transition: background-color 0.2s;
-}
-.table tbody tr:hover {
-    background-color: #495057; /* Leichter Hover */
-}
-.table tbody tr.table-warning {
-    background-color: #856404; /* Warnung */
-    color: #f8f9fa;
-}
-.alert {
-    color: #f8f9fa; /* Hell */
-    border: 1px solid #dee2e6;
-}
-.alert-success {
-    background-color: #d4edda;
-    border-color: #c3e6cb;
-    color: #155724;
-}
-.alert-warning {
-    background-color: #fff3cd;
-    border-color: #ffeaa7;
-    color: #856404;
-}
-.alert-danger {
-    background-color: #f8d7da;
-    border-color: #f5c6cb;
-    color: #721c24;
-}
-.alert-info {
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
-    color: #0c5460;
-}
-.btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
-    color: #fff;
-}
-.btn-primary:hover {
-    background-color: #0056b3;
-}
-.btn-success {
-    background-color: #28a745;
-    border-color: #28a745;
-    color: #fff;
-}
-.btn-success:hover {
-    background-color: #1e7e34;
-}
-.btn-warning {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #212529;
-}
-.btn-warning:hover {
-    background-color: #e0a800;
-}
-.btn-secondary {
-    background-color: #6c757d;
-    border-color: #6c757d;
-    color: #fff;
-}
-.btn-secondary:hover {
-    background-color: #545b62;
-}
-.btn-danger {
-    background-color: #dc3545;
-    border-color: #dc3545;
-    color: #fff;
-}
-.btn-danger:hover {
-    background-color: #c82333;
-}
-.btn-info {
-    background-color: #17a2b8;
-    border-color: #17a2b8;
-    color: #fff;
-}
-.btn-info:hover {
-    background-color: #117a8b;
-}
-.btn-outline-danger {
-    border-color: #dc3545;
-    color: #dc3545;
-}
-.btn-outline-danger:hover {
-    background-color: #dc3545;
-    color: #fff;
-}
-.form-control {
-    background-color: #343a40;
-    border-color: #495057;
-    color: #f8f9fa; /* Hell */
-}
-.form-control:focus {
-    background-color: #343a40;
-    border-color: #80bdff;
-    color: #f8f9fa; /* Hell */
-    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-}
-#mapStatus .cache-info {
-    font-size: 0.9em;
-    color: #ffc107; /* Gelb für Akzent */
-}
-.input-group .form-control {
-    color: #f8f9fa;
-}
-@media (max-width: 768px) {
-    .table {
-        font-size: 0.85em;
-    }
-    .row > div {
-        margin-bottom: 10px;
-    }
+
+/* Hover-Effekt für bessere Lesbarkeit */
+.table tr:hover {
+    background-color: rgba(255,255,255,0.1) !important;
 }
