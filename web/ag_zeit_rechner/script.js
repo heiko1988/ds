@@ -222,11 +222,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!arrival) return div.innerHTML = '<div class="alert alert-danger">Ungültige Ankunftszeit!</div>';
 
         let html = `<table class="table table-dark table-striped"><thead><tr>
-            <th class="target-col">Ziel-Dorfname</th>
-            <th class="target-col">Ziel-Koordinate</th>
             <th class="attack-col">Spieler</th>
             <th class="attack-col">Dorf</th>
             <th class="attack-col">Koordinaten</th>
+            <th class="target-col">Ziel-Dorfname</th>
+            <th class="target-col">Ziel-Koordinate</th>
             <th>AG-Speed</th>
             <th>Entfernung</th>
             <th>Laufzeit</th>
@@ -242,11 +242,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const runtime = msToHHMMSS(seconds * 1000);
             const start = new Date(arrival.getTime() - seconds * 1000);
             html += `<tr>
-                <td>${p.target.name}</td>
-                <td>${p.target.x}|${p.target.y}</td>
                 <td>${v.playerName || '?'}</td>
                 <td>${v.name || '?'}</td>
                 <td>${v.x}|${v.y}</td>
+                <td>${p.target.name}</td>
+                <td>${p.target.x}|${p.target.y}</td>
                 <td>${v.speed}</td>
                 <td>${dist.toFixed(2)}</td>
                 <td>${runtime}</td>
@@ -268,12 +268,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             html += `<h5 class="mt-4">${p.name || 'Profil '+(i+1)} – Ziel: ${p.target.name} (${p.target.x}|${p.target.y})</h5>`;
             html += `<table class="table table-dark table-striped"><thead><tr>
-                <th class="target-col">Ziel-Dorfname</th>
-                <th class="target-col">Ziel-Koordinate</th>
-                <th class="target-col">Ziel-Spieler</th>
                 <th class="attack-col">Spieler</th>
                 <th class="attack-col">Dorf</th>
                 <th class="attack-col">Koordinaten</th>
+                <th class="target-col">Ziel-Spieler</th>
+                <th class="target-col">Ziel-Dorfname</th>
+                <th class="target-col">Ziel-Koordinate</th>
                 <th>AG-Speed</th>
                 <th>Entfernung</th>
                 <th>Laufzeit</th>
@@ -290,12 +290,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const runtime = msToHHMMSS(seconds * 1000);
                 const start = new Date(arrival.getTime() - seconds * 1000);
                 html += `<tr>
-                    <td>${p.target.name}</td>
-                    <td>${p.target.x}|${p.target.y}</td>
-                    <td>${p.target.playerName || '?'}</td>
                     <td>${v.playerName || '?'}</td>
                     <td>${v.name || '?'}</td>
                     <td>${v.x}|${v.y}</td>
+                    <td>${p.target.playerName || '?'}</td>
+                    <td>${p.target.name}</td>
+                    <td>${p.target.x}|${p.target.y}</td>
                     <td>${v.speed}</td>
                     <td>${dist.toFixed(2)}</td>
                     <td>${runtime}</td>
