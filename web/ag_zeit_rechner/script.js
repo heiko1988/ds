@@ -342,22 +342,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        const targetTitle = `Ziel: ${profile.target.name} @ ${profile.target.x}|${profile.target.y}`;
-        let html = `<h6 class="mt-3">${targetTitle}</h6>`;
         let table = '<table class="table table-dark"><thead><tr>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 0)">Dorf</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 1)">Spieler</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 2)">Koordinaten</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 3)">AG-Speed</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 4)">Entfernung</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 5)">Laufzeit</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 6)">Startzeit</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 0)">Ziel-Dorfname</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 1)">Ziel-Koordinaten</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 2)">Dorf</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 3)">Spieler</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 4)">Koordinaten</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 5)">AG-Speed</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 6)">Entfernung</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 7)">Laufzeit</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 8)">Startzeit</th>' +
             '</tr></thead><tbody id="results-table-body-' + profileIndex + '">';
 
         let validVillages = 0;
         profile.villages.forEach(village => {
             if (!village.x || !village.y) {
-                table += `<tr class="table-warning"><td>${village.name || 'Unbenannt'}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>Dorf nicht geladen!</td><td>-</td></tr>`;
+                table += `<tr class="table-warning"><td>${profile.target.name || '-'} </td><td>${profile.target.x}|${profile.target.y}</td><td>${village.name || 'Unbenannt'}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>Dorf nicht geladen!</td><td>-</td></tr>`;
                 return;
             }
             const speed = village.speed || 35;
@@ -368,11 +368,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const runtimeStr = msToHHMMSS(runtimeMs);
             const startDate = calculateStartTime(arrivalDate, runtimeMs);
             const startStr = formatDateTime(startDate);
-            table += `<tr><td>${village.name || 'Unbenannt'}</td><td>${village.playerName || 'Unbekannt'}</td><td>${village.x}|${village.y}</td><td>${speed}</td><td>${dist.toFixed(1)}</td><td>${runtimeStr}</td><td>${startStr}</td></tr>`;
+            table += `<tr><td>${profile.target.name || '-'}</td><td>${profile.target.x}|${profile.target.y}</td><td>${village.name || 'Unbenannt'}</td><td>${village.playerName || 'Unbekannt'}</td><td>${village.x}|${village.y}</td><td>${speed}</td><td>${dist.toFixed(1)}</td><td>${runtimeStr}</td><td>${startStr}</td></tr>`;
             validVillages++;
         });
         table += '</tbody></table>';
-        resultsDiv.innerHTML = validVillages > 0 ? html + table : '<div class="alert alert-info">Keine gültigen Dörfer zum Berechnen.</div>';
+        resultsDiv.innerHTML = validVillages > 0 ? table : '<div class="alert alert-info">Keine gültigen Dörfer zum Berechnen.</div>';
     }
 
     function renderOverviewTab() {
@@ -399,14 +399,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         rows.sort((a, b) => {
             const aText = a.cells[column].textContent.trim();
             const bText = b.cells[column].textContent.trim();
-            if (column === 3) { // AG-Speed numeric
+            if (column === 5) { // AG-Speed numeric
                 return asc ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
-            } else if (column === 4) { // Entfernung numeric
+            } else if (column === 6) { // Entfernung numeric
                 return asc ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
-            } else if (column === 5) { // Laufzeit HH:MM:SS -> Sekunden
+            } else if (column === 7) { // Laufzeit HH:MM:SS -> Sekunden
                 const toSec = t => t.split(':').reduce((acc, v, i) => acc + v * Math.pow(60, 2-i), 0);
                 return asc ? toSec(aText) - toSec(bText) : toSec(bText) - toSec(aText);
-            } else if (column === 6) { // Startzeit Date
+            } else if (column === 8) { // Startzeit Date
                 return asc ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
             } else {
                 return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
@@ -443,6 +443,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const startDate = calculateStartTime(arrivalDate, runtimeMs);
                 const runtimeStr = msToHHMMSS(runtimeMs);
                 profileAttacks.push({
+                    targetName: profile.target.name || 'Unbekannt',
+                    targetCoords: `${profile.target.x}|${profile.target.y}`,
+                    targetPlayer: profile.target.playerName || 'Unbekannt',
                     village: village.name || 'Unbenannt',
                     playerName: village.playerName || 'Unbekannt',
                     coords: `${village.x}|${village.y}`,
@@ -454,31 +457,31 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             });
             if (profileAttacks.length > 0) {
-                allAttacksByProfile[profile.name || `Profil ${pIndex + 1}`] = {
-                    target: profile.target,
-                    attacks: profileAttacks
-                };
+                allAttacksByProfile[profile.name || `Profil ${pIndex + 1}`] = profileAttacks;
             }
         });
 
         let html = '';
-        Object.entries(allAttacksByProfile).forEach(([profileName, data], index) => {
-            data.attacks.sort((a, b) => new Date(a.startTimeStr) - new Date(b.startTimeStr));
+        Object.entries(allAttacksByProfile).forEach(([profileName, attacks], index) => {
+            // Sortiere initial nach Startzeit
+            attacks.sort((a, b) => new Date(a.startTimeStr) - new Date(b.startTimeStr));
             const tableId = `overview-table-${index}`;
-            const targetTitle = `Ziel: ${data.target.name} @ ${data.target.x}|${data.target.y}`;
-            html += `<h6 class="mt-4 mb-2">${profileName} – ${targetTitle}</h6>`;
+            html += `<h6 class="mt-4 mb-2">${profileName}</h6>`;
             html += `<table class="table table-dark" id="${tableId}"><thead><tr>` +
-                `<th onclick="sortTable('${tableId}', 0)">Dorf</th>` +
-                `<th onclick="sortTable('${tableId}', 1)">Spieler</th>` +
-                `<th onclick="sortTable('${tableId}', 2)">Koordinaten</th>` +
-                `<th onclick="sortTable('${tableId}', 3)">AG-Speed</th>` +
-                `<th onclick="sortTable('${tableId}', 4)">Entfernung</th>` +
-                `<th onclick="sortTable('${tableId}', 5)">Laufzeit</th>` +
-                `<th onclick="sortTable('${tableId}', 6)">Startzeit</th>` +
-                `<th onclick="sortTable('${tableId}', 7)">Ankunft</th>` +
+                `<th onclick="sortTable('${tableId}', 0)">Ziel-Dorfname</th>` +
+                `<th onclick="sortTable('${tableId}', 1)">Ziel-Koordinaten</th>` +
+                `<th onclick="sortTable('${tableId}', 2)">Ziel-Spieler</th>` +
+                `<th onclick="sortTable('${tableId}', 3)">Dorf</th>` +
+                `<th onclick="sortTable('${tableId}', 4)">Spieler</th>` +
+                `<th onclick="sortTable('${tableId}', 5)">Koordinaten</th>` +
+                `<th onclick="sortTable('${tableId}', 6)">AG-Speed</th>` +
+                `<th onclick="sortTable('${tableId}', 7)">Entfernung</th>` +
+                `<th onclick="sortTable('${tableId}', 8)">Laufzeit</th>` +
+                `<th onclick="sortTable('${tableId}', 9)">Startzeit</th>` +
+                `<th onclick="sortTable('${tableId}', 10)">Ankunft</th>` +
                 `</tr></thead><tbody>`;
-            data.attacks.forEach(attack => {
-                html += `<tr><td>${attack.village}</td><td>${attack.playerName}</td><td>${attack.coords}</td><td>${attack.speed}</td><td>${attack.dist}</td><td>${attack.runtimeStr}</td><td>${attack.startTimeStr}</td><td>${attack.arrival}</td></tr>`;
+            attacks.forEach(attack => {
+                html += `<tr><td>${attack.targetName}</td><td>${attack.targetCoords}</td><td>${attack.targetPlayer}</td><td>${attack.village}</td><td>${attack.playerName}</td><td>${attack.coords}</td><td>${attack.speed}</td><td>${attack.dist}</td><td>${attack.runtimeStr}</td><td>${attack.startTimeStr}</td><td>${attack.arrival}</td></tr>`;
             });
             html += `</tbody></table><hr class="my-3 bg-light opacity-25">`;
         });
