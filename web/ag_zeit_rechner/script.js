@@ -342,7 +342,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        let table = '<table class="table table-dark"><thead><tr><th>Dorf</th><th>Spieler</th><th>Koordinaten</th><th>AG-Speed</th><th>Entfernung</th><th>Laufzeit</th><th>Startzeit</th></tr></thead><tbody>';
+        const targetTitle = `Ziel: ${profile.target.name} @ ${profile.target.x}|${profile.target.y}`;
+        let html = `<h6 class="mt-3">${targetTitle}</h6>`;
+        let table = '<table class="table table-dark"><thead><tr>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 0)">Dorf</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 1)">Spieler</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 2)">Koordinaten</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 3)">AG-Speed</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 4)">Entfernung</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 5)">Laufzeit</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 6)">Startzeit</th>' +
+            '</tr></thead><tbody id="results-table-body-' + profileIndex + '">';
+
         let validVillages = 0;
         profile.villages.forEach(village => {
             if (!village.x || !village.y) {
@@ -361,7 +372,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             validVillages++;
         });
         table += '</tbody></table>';
-        resultsDiv.innerHTML = validVillages > 0 ? table : '<div class="alert alert-info">Keine gültigen Dörfer zum Berechnen.</div>';
+        resultsDiv.innerHTML = validVillages > 0 ? html + table : '<div class="alert alert-info">Keine gültigen Dörfer zum Berechnen.</div>';
     }
 
     function renderOverviewTab() {
@@ -378,38 +389,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         return tabPane;
     }
 
-    // Sortier-Funktion für Übersicht-Tabellen
     function sortTable(tableId, column, asc = true) {
-        const table = document.getElementById(tableId);
-        const tbody = table.querySelector('tbody');
+        const tbody = document.getElementById(tableId + '-body') || document.querySelector(`#${tableId} tbody`);
+        if (!tbody) return;
         const rows = Array.from(tbody.querySelectorAll('tr'));
-        const header = table.querySelector(`th:nth-child(${column + 1})`);
+        const header = document.querySelector(`#${tableId.replace('-body', '')} th:nth-child(${column + 1})`);
+        if (!header) return;
+
         rows.sort((a, b) => {
             const aText = a.cells[column].textContent.trim();
             const bText = b.cells[column].textContent.trim();
-            if (column === 4) { // Entfernung: Numeric
+            if (column === 3) { // AG-Speed numeric
                 return asc ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
-            } else if (column === 5) { // Laufzeit: HH:MM:SS -> Sekunden
-                const toSeconds = (time) => {
-                    const [h, m, s] = time.split(':').map(Number);
-                    return h * 3600 + m * 60 + s;
-                };
-                return asc ? toSeconds(aText) - toSeconds(bText) : toSeconds(bText) - toSeconds(aText);
-            } else if (column === 6) { // Startzeit: Date-String -> Date
-                const aDate = new Date(aText);
-                const bDate = new Date(bText);
-                return asc ? aDate - bDate : bDate - aDate;
-            } else if (column === 7) { // Ankunft: Date-String -> Date
-                const aDate = new Date(aText);
-                const bDate = new Date(bText);
-                return asc ? aDate - bDate : bDate - aDate;
+            } else if (column === 4) { // Entfernung numeric
+                return asc ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
+            } else if (column === 5) { // Laufzeit HH:MM:SS -> Sekunden
+                const toSec = t => t.split(':').reduce((acc, v, i) => acc + v * Math.pow(60, 2-i), 0);
+                return asc ? toSec(aText) - toSec(bText) : toSec(bText) - toSec(aText);
+            } else if (column === 6) { // Startzeit Date
+                return asc ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
             } else {
                 return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
             }
         });
+
         rows.forEach(row => tbody.appendChild(row));
-        // Toggle Icon (↑↓)
-        header.innerHTML = header.innerHTML.replace(/ [↑↓]$/, '') + (asc ? ' ↑' : ' ↓');
+        const icon = asc ? 'up' : 'down';
+        header.innerHTML = header.innerHTML.replace(/ [↑↓]$/, '') + (asc ? ' up' : ' down');
     }
 
     function updateOverview() {
@@ -448,30 +454,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                 });
             });
             if (profileAttacks.length > 0) {
-                allAttacksByProfile[profile.name || `Profil ${pIndex + 1}`] = profileAttacks;
+                allAttacksByProfile[profile.name || `Profil ${pIndex + 1}`] = {
+                    target: profile.target,
+                    attacks: profileAttacks
+                };
             }
         });
 
         let html = '';
-        Object.entries(allAttacksByProfile).forEach(([profileName, attacks], index) => {
-            // Sortiere initial nach Startzeit
-            attacks.sort((a, b) => new Date(a.startTimeStr) - new Date(b.startTimeStr));
+        Object.entries(allAttacksByProfile).forEach(([profileName, data], index) => {
+            data.attacks.sort((a, b) => new Date(a.startTimeStr) - new Date(b.startTimeStr));
             const tableId = `overview-table-${index}`;
-            html += `<h6 class="mt-4 mb-2">${profileName}</h6>`;
-            html += `<table class="table table-dark" id="${tableId}"><thead><tr>
-                <th onclick="sortTable('${tableId}', 0)">Dorf <span class="sort-icon">↑↓</span></th>
-                <th onclick="sortTable('${tableId}', 1)">Spieler <span class="sort-icon">↑↓</span></th>
-                <th onclick="sortTable('${tableId}', 2)">Koords <span class="sort-icon">↑↓</span></th>
-                <th onclick="sortTable('${tableId}', 3)">AG-Speed <span class="sort-icon">↑↓</span></th>
-                <th onclick="sortTable('${tableId}', 4)">Entfernung <span class="sort-icon">↑↓</span></th>
-                <th onclick="sortTable('${tableId}', 5)">Laufzeit <span class="sort-icon">↑↓</span></th>
-                <th onclick="sortTable('${tableId}', 6)">Startzeit <span class="sort-icon">↑↓</span></th>
-                <th onclick="sortTable('${tableId}', 7)">Ankunft <span class="sort-icon">↑↓</span></th>
-            </tr></thead><tbody>`;
-            attacks.forEach(attack => {
+            const targetTitle = `Ziel: ${data.target.name} @ ${data.target.x}|${data.target.y}`;
+            html += `<h6 class="mt-4 mb-2">${profileName} – ${targetTitle}</h6>`;
+            html += `<table class="table table-dark" id="${tableId}"><thead><tr>` +
+                `<th onclick="sortTable('${tableId}', 0)">Dorf</th>` +
+                `<th onclick="sortTable('${tableId}', 1)">Spieler</th>` +
+                `<th onclick="sortTable('${tableId}', 2)">Koordinaten</th>` +
+                `<th onclick="sortTable('${tableId}', 3)">AG-Speed</th>` +
+                `<th onclick="sortTable('${tableId}', 4)">Entfernung</th>` +
+                `<th onclick="sortTable('${tableId}', 5)">Laufzeit</th>` +
+                `<th onclick="sortTable('${tableId}', 6)">Startzeit</th>` +
+                `<th onclick="sortTable('${tableId}', 7)">Ankunft</th>` +
+                `</tr></thead><tbody>`;
+            data.attacks.forEach(attack => {
                 html += `<tr><td>${attack.village}</td><td>${attack.playerName}</td><td>${attack.coords}</td><td>${attack.speed}</td><td>${attack.dist}</td><td>${attack.runtimeStr}</td><td>${attack.startTimeStr}</td><td>${attack.arrival}</td></tr>`;
             });
-            html += '</tbody></table><hr class="my-3 bg-light opacity-25">';
+            html += `</tbody></table><hr class="my-3 bg-light opacity-25">`;
         });
         overviewResults.innerHTML = Object.keys(allAttacksByProfile).length > 0 ? html : '<p>Keine gültigen Angriffe.</p>';
     }
