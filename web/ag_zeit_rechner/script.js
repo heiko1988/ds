@@ -345,30 +345,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         let table = '<table class="table table-dark"><thead><tr>' +
             '<th onclick="sortTable(`results-table-${profileIndex}`, 0)">Ziel-Dorfname</th>' +
             '<th onclick="sortTable(`results-table-${profileIndex}`, 1)">Ziel-Koordinaten</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 2)">Dorf</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 3)">Spieler</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 4)">Koordinaten</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 5)">AG-Speed</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 6)">Entfernung</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 7)">Laufzeit</th>' +
-            '<th onclick="sortTable(`results-table-${profileIndex}`, 8)">Startzeit</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 2)">Ziel-Spieler</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 3)">Dorf</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 4)">Spieler</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 5)">Koordinaten</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 6)">AG-Speed</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 7)">Entfernung</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 8)">Laufzeit</th>' +
+            '<th onclick="sortTable(`results-table-${profileIndex}`, 9)">Startzeit</th>' +
             '</tr></thead><tbody id="results-table-body-' + profileIndex + '">';
 
         let validVillages = 0;
         profile.villages.forEach(village => {
             if (!village.x || !village.y) {
-                table += `<tr class="table-warning"><td>${profile.target.name || '-'} </td><td>${profile.target.x}|${profile.target.y}</td><td>${village.name || 'Unbenannt'}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>Dorf nicht geladen!</td><td>-</td></tr>`;
+                table += `<tr class="table-warning"><td>${profile.target.name || '-'} </td><td>${profile.target.x}|${profile.target.y}</td><td>${profile.target.playerName || 'Unbekannt'}</td><td>${village.name || 'Unbenannt'}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>Dorf nicht geladen!</td><td>-</td></tr>`;
                 return;
             }
             const speed = village.speed || 35;
             const dx = village.x - profile.target.x;
             const dy = village.y - profile.target.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            const runtimeMs = dist * speed * 60 * 1000;
+            const runtime_sec = Math.round(dist * speed * 60); // Fix: Round to nearest second for accuracy
+            const runtimeMs = runtime_sec * 1000;
             const runtimeStr = msToHHMMSS(runtimeMs);
             const startDate = calculateStartTime(arrivalDate, runtimeMs);
             const startStr = formatDateTime(startDate);
-            table += `<tr><td>${profile.target.name || '-'}</td><td>${profile.target.x}|${profile.target.y}</td><td>${village.name || 'Unbenannt'}</td><td>${village.playerName || 'Unbekannt'}</td><td>${village.x}|${village.y}</td><td>${speed}</td><td>${dist.toFixed(1)}</td><td>${runtimeStr}</td><td>${startStr}</td></tr>`;
+            table += `<tr><td>${profile.target.name || '-'} </td><td>${profile.target.x}|${profile.target.y}</td><td>${profile.target.playerName || 'Unbekannt'}</td><td>${village.name || 'Unbenannt'}</td><td>${village.playerName || 'Unbekannt'}</td><td>${village.x}|${village.y}</td><td>${speed}</td><td>${dist.toFixed(2)}</td><td>${runtimeStr}</td><td>${startStr}</td></tr>`; // dist.toFixed(2) for precision
             validVillages++;
         });
         table += '</tbody></table>';
@@ -408,6 +410,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return asc ? toSec(aText) - toSec(bText) : toSec(bText) - toSec(aText);
             } else if (column === 8) { // Startzeit Date
                 return asc ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
+            } else if (column === 9) { // Ankunft Date
+                return asc ? new Date(aText) - new Date(bText) : new Date(bText) - new Date(aText);
             } else {
                 return asc ? aText.localeCompare(bText) : bText.localeCompare(aText);
             }
@@ -439,7 +443,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const dx = village.x - profile.target.x;
                 const dy = village.y - profile.target.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
-                const runtimeMs = dist * speed * 60 * 1000;
+                const runtime_sec = Math.round(dist * speed * 60); // Fix: Round to nearest second for accuracy
+                const runtimeMs = runtime_sec * 1000;
+                const runtimeStr = msToHHMMSS(runtimeMs);
                 const startDate = calculateStartTime(arrivalDate, runtimeMs);
                 const runtimeStr = msToHHMMSS(runtimeMs);
                 profileAttacks.push({
@@ -450,7 +456,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     playerName: village.playerName || 'Unbekannt',
                     coords: `${village.x}|${village.y}`,
                     speed,
-                    dist: dist.toFixed(1),
+                    dist: dist.toFixed(2), // Mehr Präzision
                     runtimeStr,
                     startTimeStr: formatDateTime(startDate),
                     arrival: formatDateTime(arrivalDate)
