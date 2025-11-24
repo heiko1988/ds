@@ -5,109 +5,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🛡️ Stämme Bash-Rechner 80/120% (DEB20 & Co.)</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Mono:wght@300;400;500&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%); color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        .container { max-width: 800px; margin-top: 50px; }
-        .card { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
-        .btn-calc { background: linear-gradient(45deg, #ff6b6b, #ee5a24); border: none; font-weight: bold; }
-        .btn-calc:hover { transform: scale(1.05); box-shadow: 0 10px 20px rgba(255,107,107,0.4); }
-        .alert-success { background: rgba(40,167,69,0.3); border: 1px solid #28a745; }
-        .alert-danger { background: rgba(220,53,69,0.3); border: 1px solid #dc3545; }
-        .range-bar { background: rgba(255,255,255,0.1); height: 20px; border-radius: 10px; overflow: hidden; }
-        .range-fill { height: 100%; transition: width 0.5s; border-radius: 10px; }
-        .lower { background: linear-gradient(90deg, #ffc107, #ffed4a); }
-        .upper { background: linear-gradient(90deg, #28a745, #20c997); }
-        .current { background: linear-gradient(90deg, #dc3545, #ff416c); }
-        #ergebnis { min-height: 200px; }
-        .info-icon { cursor: pointer; color: #ffc107; }
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #0f0f23;
+            --glass-bg: rgba(255,255,255,0.05);
+            --glass-border: rgba(0,255,255,0.3);
+            --neon-cyan: #00ffff;
+            --neon-magenta: #ff00ff;
+            --neon-lime: #00ff41;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-accent: var(--neon-cyan);
+        }
+        body {
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 50%, #1a1a2e 100%);
+            color: var(--text-primary);
+            font-family: 'Roboto Mono', monospace;
+            overflow-x: hidden;
+        }
+        .container { max-width: 900px; margin-top: 40px; }
+        h1, h2, h5 { font-family: 'Orbitron', monospace; font-weight: 700; }
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 32px rgba(0,255,255,0.1);
+            transition: all 0.3s ease;
+        }
+        .card:hover {
+            box-shadow: 0 12px 48px rgba(0,255,255,0.2);
+            border-color: var(--neon-cyan);
+        }
+        .form-control, .form-control::placeholder {
+            background: rgba(255,255,255,0.08) !important;
+            border: 1px solid var(--glass-border) !important;
+            color: var(--text-primary) !important;
+            backdrop-filter: blur(10px);
+        }
+        .form-control:focus {
+            border-color: var(--neon-cyan) !important;
+            box-shadow: 0 0 20px rgba(0,255,255,0.3) !important;
+        }
+        .form-label { color: var(--text-primary); font-weight: 500; }
+        .btn-calc {
+            background: linear-gradient(45deg, var(--neon-cyan), var(--neon-magenta));
+            border: none;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-calc::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: left 0.5s;
+        }
+        .btn-calc:hover::before { left: 100%; }
+        .btn-calc:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0,255,255,0.5);
+        }
+        .alert-success { background: rgba(0,255,65,0.15); border: 1px solid var(--neon-lime); color: var(--text-primary); }
+        .alert-danger { background: rgba(255,0,255,0.15); border: 1px solid var(--neon-magenta); color: var(--text-primary); }
+        .range-bar {
+            background: rgba(255,255,255,0.08);
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+        }
+        .range-fill {
+            height: 100%;
+            transition: all 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+            box-shadow: 0 0 15px currentColor;
+            position: absolute;
+            top: 0;
+        }
+        .lower { background: linear-gradient(90deg, var(--neon-lime), #00ff88); color: var(--neon-lime); }
+        .upper { background: linear-gradient(90deg, var(--neon-cyan), #00ccff); color: var(--neon-cyan); }
+        .current { background: linear-gradient(90deg, var(--neon-magenta), #ff66cc); color: var(--neon-magenta); }
+        #ergebnis { min-height: 280px; }
+        .spinner-border {
+            width: 4rem; height: 4rem;
+            border-width: 0.4em;
+            border-color: var(--neon-cyan);
+        }
+        .spinner-border::after { border-color: var(--neon-magenta); }
+        .h3, .fs-4, .h2 { font-family: 'Orbitron', sans-serif; }
+        .small { color: var(--text-secondary); }
+        a { color: var(--neon-cyan); text-decoration: none; }
+        a:hover { text-shadow: 0 0 10px var(--neon-cyan); }
+        ul { padding-left: 20px; }
+        .text-center .h3.fw-bold { text-shadow: 0 0 20px currentColor; }
+        .fade-in { animation: fadeIn 1s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .info-icon:hover { color: var(--neon-lime); transform: scale(1.2); }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold mb-3"><i class="fas fa-shield-alt me-3"></i>Stämme Bash-Rechner</h1>
-            <p class="lead">80/120% Regel – Für DEB20 & alle Battle-Welten <br><small class="text-muted">Eingaben: Deine Punkte (Angreifer) & Ziel-Punkte</small></p>
+        <div class="text-center mb-5 fade-in">
+            <h1 class="display-3 fw-bold mb-3" style="font-family: 'Orbitron', monospace; text-shadow: 0 0 30px var(--neon-cyan);">
+                <i class="fas fa-shield-alt me-3" style="color: var(--neon-lime);"></i>Stämme Bash-Rechner
+            </h1>
+            <p class="lead" style="font-size: 1.2rem;">80/120% Regel – Für DEB20 & alle Battle-Welten</p>
+            <small class="text-secondary">Eingaben: Deine Punkte (Angreifer) & Ziel-Punkte</small>
         </div>
 
         <div class="row justify-content-center">
             <div class="col-md-10">
-                <div class="card p-4 mb-4">
-                    <div class="row g-3">
+                <div class="card p-5 mb-4 fade-in">
+                    <div class="row g-4 align-items-end">
                         <div class="col-md-5">
-                            <label class="form-label fw-bold"><i class="fas fa-user-tie me-2"></i>Deine Punkte (Angreifer)</label>
-                            <input type="number" class="form-control form-control-lg text-center fw-bold" id="pa" value="39023" min="1" placeholder="z.B. 39.023">
+                            <label class="form-label fw-bold fs-5"><i class="fas fa-user-tie me-2" style="color: var(--neon-lime);"></i>Deine Punkte (Angreifer)</label>
+                            <input type="number" class="form-control form-control-lg text-center fw-bold fs-4" id="pa" value="39023" min="1" placeholder="z.B. 39.023">
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label fw-bold"><i class="fas fa-target me-2"></i>Ziel-Punkte</label>
-                            <input type="number" class="form-control form-control-lg text-center fw-bold" id="pz" value="26266" min="1" placeholder="z.B. 26.266">
+                            <label class="form-label fw-bold fs-5"><i class="fas fa-target me-2" style="color: var(--neon-magenta);"></i>Ziel-Punkte</label>
+                            <input type="number" class="form-control form-control-lg text-center fw-bold fs-4" id="pz" value="26266" min="1" placeholder="z.B. 26.266">
                         </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button class="btn btn-calc btn-lg w-100" onclick="berechne()">
+                        <div class="col-md-2">
+                            <button class="btn btn-calc btn-lg w-100 p-3" onclick="berechne()">
                                 <i class="fas fa-calculator me-2"></i>Rechnen!
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div id="ergebnis" class="card p-4">
+                <div id="ergebnis" class="card p-5 fade-in">
                     <div class="text-center">
-                        <div class="spinner-border text-primary mb-3" role="status" id="loader" style="display:none;">
+                        <div class="spinner-border text-primary mb-4" role="status" id="loader" style="display:none;">
                             <span class="visually-hidden">Lädt...</span>
                         </div>
-                        <h2 id="status" class="mb-4"></h2>
-                        <p id="action" class="fs-4 fw-bold mb-4"></p>
-                        <div id="range-viz" class="mb-4"></div>
+                        <h2 id="status" class="mb-4" style="font-size: 2.5rem;"></h2>
+                        <p id="action" class="fs-3 fw-bold mb-4" style="font-family: 'Orbitron';"></p>
+                        <div id="range-viz" class="mb-5"></div>
                         <div class="row text-center">
                             <div class="col-md-4">
-                                <div class="h3 fw-bold" id="ratio">0%</div>
+                                <div class="h3 fw-bold mb-1" id="ratio" style="color: var(--neon-cyan);">0%</div>
                                 <small>Aktuelles Verhältnis</small>
                             </div>
                             <div class="col-md-4">
-                                <div class="h3 fw-bold" id="diff">0</div>
+                                <div class="h3 fw-bold mb-1" id="diff" style="color: var(--neon-lime);">0</div>
                                 <small>Punkte Delta</small>
                             </div>
                             <div class="col-md-4">
-                                <div class="h3 fw-bold" id="target">0</div>
+                                <div class="h3 fw-bold mb-1" id="target" style="color: var(--neon-magenta);">0</div>
                                 <small>Ziel-Punkte</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row mt-5">
                     <div class="col-md-6">
-                        <div class="card p-4">
-                            <h5><i class="fas fa-info-circle me-2"></i>Die Regel erklärt</h5>
-                            <ul class="small">
+                        <div class="card p-4 h-100 fade-in">
+                            <h5 class="mb-4" style="color: var(--neon-cyan);"><i class="fas fa-info-circle me-2"></i>Die Regel erklärt</h5>
+                            <ul class="small lh-lg">
                                 <li><strong>Formel:</strong> max(P_a, P_z) ≤ ⌊min(P_a, P_z) × 1,2⌋</li>
                                 <li><strong>Range für Angreifer:</strong> ⌈P_z / 1,2⌉ bis ⌊P_z × 1,2⌋</li>
                                 <li><strong>Symmetrisch:</strong> ~83,3% bis 120% des Ziels</li>
-                                <li>Live-Check im Spiel: Angriffsfenster!</li><grok-card data-id="a671e7" data-type="citation_card"></grok-card>
+                                <li>Live-Check im Spiel: Angriffsfenster!</li>
                             </ul>
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <div class="card p-4">
-                            <h5><i class="fas fa-hammer me-2"></i>Abbau-Tipps (schnellste Methode!)</h5>
-                            <ul class="small">
+                        <div class="card p-4 h-100 fade-in">
+                            <h5 class="mb-4" style="color: var(--neon-lime);"><i class="fas fa-hammer me-2"></i>Abbau-Tipps (schnellste Methode!)</h5>
+                            <ul class="small lh-lg">
                                 <li><strong>Abriss (HQ ≥15):</strong> Werkstatt, Marktplatz, Schmiede – parallel in allen Dörfern!</li>
                                 <li><strong>~Punkte-Beispiele:</strong> Marktplatz 25: 1.800 | Werkstatt 15: 1.200 | Schmiede 20: 1.500</li>
-                                <li><a href="https://ds-ultimate.de/de/tools/pointCalc" target="_blank" class="text-warning">→ Punkterechner</a> für exakt!</li>
+                                <li><a href="https://ds-ultimate.de/de/tools/pointCalc" target="_blank" class="text-warning fs-6">→ Punkterechner</a> für exakt!</li>
                                 <li><strong>Vermeide:</strong> Kaserne/Stall/Minen – Off/Prod killen!</li>
                                 <li>Premium für Speed! Warte ggf. auf Ziel-Wachstum.</li>
                             </ul>
                         </div>
                     </div>
-                </div>
-
-                <div class="card p-4 mt-4">
-                    <h5><i class="fas fa-exclamation-triangle me-2"></i>Warnungen</h5>
-                    <ul class="small">
-                        <li>Abbau schwächt Pop/Bau – nur für Rimshots!</li>
-                        <li>Illegales (Buddy-Feed): Ban-Risiko!</li>
-                        <li>DEB20-Speed: Abriss in Stunden fertig.</li>
-                    </ul>
                 </div>
             </div>
         </div>
@@ -118,14 +195,14 @@
             const loader = document.getElementById('loader');
             const ergebnis = document.getElementById('ergebnis');
             loader.style.display = 'block';
-            ergebnis.classList.add('opacity-50');
+            ergebnis.style.opacity = '0.7';
             setTimeout(() => {
                 const pa = parseInt(document.getElementById('pa').value) || 0;
                 const pz = parseInt(document.getElementById('pz').value) || 0;
                 if (pa <= 0 || pz <= 0) {
                     document.getElementById('status').innerHTML = '❌ Ungültige Eingabe!';
                     loader.style.display = 'none';
-                    ergebnis.classList.remove('opacity-50');
+                    ergebnis.style.opacity = '1';
                     return;
                 }
 
@@ -137,56 +214,62 @@
                 const lowerBound = Math.ceil(pz * 100 / 120);
                 const upperBound = Math.floor(pz * 120 / 100);
 
-                let statusHtml = isAllowed ? '<i class="fas fa-check-circle text-success fs-1"></i><br>✅ ANGRIFF ERLAUBT!' : '<i class="fas fa-times-circle text-danger fs-1"></i><br>❌ ANGRIFF GESPERRT!';
+                let statusHtml = isAllowed ? '<i class="fas fa-check-circle" style="color: var(--neon-lime); font-size: 4rem;"></i><br>✅ ANGRIFF ERLAUBT!' : '<i class="fas fa-times-circle" style="color: var(--neon-magenta); font-size: 4rem;"></i><br>❌ ANGRIFF GESPERRT!';
                 document.getElementById('status').innerHTML = statusHtml;
 
                 let actionHtml = '';
                 let diff = 0;
                 let target = pa;
                 if (isAllowed) {
-                    actionHtml = '<i class="fas fa-thumbs-up text-success me-2"></i><strong>Perfekt im Korridor!</strong><br>Du kannst direkt angreifen.';
+                    actionHtml = '<i class="fas fa-thumbs-up" style="color: var(--neon-lime); font-size: 2rem; margin-right: 10px;"></i><strong>Perfekt im Korridor!</strong><br>Du kannst direkt angreifen.';
+                    document.getElementById('action').style.color = 'var(--neon-lime)';
                 } else if (pa > pz) {
                     target = upperBound;
                     diff = pa - target;
-                    actionHtml = `<i class="fas fa-hammer text-warning me-2"></i>Abbau nötig:<br>
-                                  <strong>${diff.toLocaleString('de-DE')}</strong> Punkte<br>
-                                  auf <strong>${target.toLocaleString('de-DE')}</strong>`;
+                    actionHtml = `<i class="fas fa-hammer" style="color: var(--neon-cyan); font-size: 2rem; margin-right: 10px;"></i>Abbau nötig:<br>
+                                  <strong style="color: var(--neon-lime); font-size: 2rem;">${diff.toLocaleString('de-DE')}</strong> Punkte<br>
+                                  auf <strong style="color: var(--neon-magenta);">${target.toLocaleString('de-DE')}</strong>`;
+                    document.getElementById('action').style.color = 'var(--neon-cyan)';
                 } else {
                     target = lowerBound;
                     diff = target - pa;
-                    actionHtml = `<i class="fas fa-plus-circle text-info me-2"></i>Bau nötig:<br>
-                                  <strong>${diff.toLocaleString('de-DE')}</strong> Punkte<br>
-                                  auf <strong>${target.toLocaleString('de-DE')}</strong> (Untergrenze)`;
+                    actionHtml = `<i class="fas fa-plus-circle" style="color: var(--neon-lime); font-size: 2rem; margin-right: 10px;"></i>Bau nötig:<br>
+                                  <strong style="color: var(--neon-lime); font-size: 2rem;">${diff.toLocaleString('de-DE')}</strong> Punkte<br>
+                                  auf <strong style="color: var(--neon-magenta);">${target.toLocaleString('de-DE')}</strong> (Untergrenze)`;
+                    document.getElementById('action').style.color = 'var(--neon-lime)';
                 }
                 document.getElementById('action').innerHTML = actionHtml;
                 document.getElementById('ratio').textContent = ratio;
                 document.getElementById('diff').textContent = diff === 0 ? '0' : (diff > 0 ? '+' + diff.toLocaleString('de-DE') : diff.toLocaleString('de-DE'));
                 document.getElementById('target').textContent = target.toLocaleString('de-DE');
 
-                // Range-Bar visualisieren
+                // Range-Bar visualisieren (futuristisch)
                 const totalWidth = upperBound - lowerBound + 1;
-                const paPos = ((pa - lowerBound) / totalWidth) * 100;
+                const paPos = Math.max(0, Math.min(100, ((pa - lowerBound) / totalWidth) * 100));
                 let vizHtml = `
-                    <div class="range-bar mb-2">
-                        <div class="range-fill lower" style="width: ${Math.min(100, (pz > pa ? 100 : (pa <= upperBound ? paPos : 100)))}%"></div>
-                        <div class="range-fill upper" style="width: ${100 - Math.min(100, paPos)}%; margin-left: ${Math.min(100, paPos)}%"></div>
+                    <div class="range-bar mb-3" style="max-width: 400px; margin: 0 auto;">
+                        <div class="range-fill lower" style="width: ${paPos}%; left: 0;"></div>
+                        <div class="range-fill upper" style="width: ${100 - paPos}%; left: ${paPos}%;"></div>
+                        ${pa >= lowerBound && pa <= upperBound ? '' : `<div class="range-fill current" style="width: 4px; left: ${paPos}%; height: 200%; transform: translateY(-50%);"></div>`}
                     </div>
-                    <small class="text-muted">
-                        Range für dich: <strong>${lowerBound.toLocaleString('de-DE')}</strong> &mdash; <strong>${upperBound.toLocaleString('de-DE')}</strong>
-                        ${pa < lowerBound ? '<span class="text-info">← Bauen</span>' : pa > upperBound ? '<span class="text-warning">Abbauen →</span>' : '<span class="text-success">Im Range!</span>'}
+                    <small class="text-secondary fs-6">
+                        Range für dich: <strong style="color: var(--neon-lime);">${lowerBound.toLocaleString('de-DE')}</strong> &mdash; <strong style="color: var(--neon-cyan);">${upperBound.toLocaleString('de-DE')}</strong>
+                        ${pa < lowerBound ? '<span style="color: var(--neon-lime);">← Bauen</span>' : pa > upperBound ? '<span style="color: var(--neon-magenta);">Abbauen →</span>' : '<span style="color: var(--neon-lime);">Im Range!</span>'}
                     </small>`;
                 document.getElementById('range-viz').innerHTML = vizHtml;
 
                 loader.style.display = 'none';
-                ergebnis.classList.remove('opacity-50');
-            }, 500);
+                ergebnis.style.opacity = '1';
+                ergebnis.style.transform = 'scale(1.02)';
+                setTimeout(() => { ergebnis.style.transform = 'scale(1)'; }, 200);
+            }, 600);
         }
 
-        // Auto-calc on enter
+        // Auto-calc on enter & initial
         document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('pa').addEventListener('keypress', (e) => { if (e.key === 'Enter') berechne(); });
             document.getElementById('pz').addEventListener('keypress', (e) => { if (e.key === 'Enter') berechne(); });
-            berechne(); // Initial mit Beispielen
+            setTimeout(berechne, 300);
         });
     </script>
 </body>
