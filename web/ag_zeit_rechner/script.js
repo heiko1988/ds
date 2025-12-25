@@ -30,16 +30,59 @@ document.addEventListener('DOMContentLoaded', async () => {
         return `${year}-${month}-${day} ${hours}:${minutes}:00`;
     }
 
+    // New loadMapData with proxy fallback and better logging
     async function loadMapData() {
         setMapStatus('Lade Karte...');
-        try {
-            const [villageRes, playerRes] = await Promise.all([
-                fetch('https://corsproxy.io/?' + encodeURIComponent(VILLAGE_ORIG + '?t=' + Date.now())),
-                fetch('https://corsproxy.io/?' + encodeURIComponent(PLAYER_ORIG + '?t=' + Date.now()))
-            ]);
-            if (!villageRes.ok || !playerRes.ok) throw new Error('HTTP-Fehler');
 
-            const [villageText, playerText] = await Promise.all([villageRes.text(), playerRes.text()]);
+        const proxies = [
+            // try direct first (no proxy) - sometimes CORS is allowed
+            null,
+            // public raw proxies
+            'https://api.allorigins.win/raw?url={url}',
+            'https://thingproxy.freeboard.io/fetch/{url}',
+            'https://cors.bridged.cc/{url}'
+        ];
+
+        async function tryFetchWithTemplate(template, resource) {
+            // template === null => direct fetch
+            const url = resource + '?t=' + Date.now();
+            const fetchUrl = template ? template.replace('{url}', encodeURIComponent(url)) : url;
+            try {
+                console.debug('Fetching', fetchUrl, template ? '(via proxy)' : '(direct)');
+                const res = await fetch(fetchUrl);
+                if (!res.ok) {
+                    // attempt to read small response to help debugging
+                    let body = '';
+                    try { body = await res.text(); } catch (e) { body = '<no body>'; }
+                    throw new Error(`Status ${res.status} ${res.statusText} - ${body.substring(0,200)}`);
+                }
+                return res;
+            } catch (err) {
+                console.warn('Fetch failed for', fetchUrl, err && err.message ? err.message : err);
+                throw err;
+            }
+        }
+
+        async function fetchResourceText(resource) {
+            let lastErr = null;
+            for (const p of proxies) {
+                try {
+                    const res = await tryFetchWithTemplate(p, resource);
+                    const text = await res.text();
+                    return text;
+                } catch (e) {
+                    lastErr = e;
+                    // try next proxy
+                }
+            }
+            throw lastErr || new Error('Alle Proxies fehlgeschlagen');
+        }
+
+        try {
+            const [villageText, playerText] = await Promise.all([
+                fetchResourceText(VILLAGE_ORIG),
+                fetchResourceText(PLAYER_ORIG)
+            ]);
 
             playerMap.clear();
             playerText.split('\n').forEach(line => {
@@ -72,7 +115,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             setMapStatus(`Karte geladen – ${villageMap.size} Dörfer, ${playerMap.size} Spieler`, 'success');
         } catch (e) {
             mapLoaded = false;
-            setMapStatus('Fehler beim Laden der Karte: ' + e.message, 'error');
+            console.error('Fehler beim Laden der Karte:', e);
+            setMapStatus('Fehler beim Laden der Karte: ' + (e.message || e), 'error');
         }
     }
 
@@ -143,7 +187,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <input type="text" class="form-control" id="profileName-${idx}" value="${p.name || ''}">
             </div>
             <div class="mb-3"><label class="form-label">Ankunftszeit</label>
-                <input type="datetime-local" class="form-control" id="arrivalTime-${idx}" value="${(p.arrivalTime||getCurrentDateTime()).replace(/:\d{2}$/,'')}" step="1">
+                <input type="datetime-local" class="form-control" id="arrivalTime-${idx}" value="${(p.arrivalTime||getCurrentDateTime()).replace(/:\\d{2}$/,'')}" step="1">
                 <small class="form-text bg-light p-1 rounded">Klicke für Kalender/Uhrzeit. Format: YYYY-MM-DDTHH:MM</small>
             </div>
             <div class="mb-3"><label class="form-label">Ziel-Dorf (ID, Name oder Koords)</label>
